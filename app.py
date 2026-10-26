@@ -58,11 +58,11 @@ HTML = """
   <h1>Young Teacher</h1>
   <p class="sub">Выберите нужный раздел</p>
   <div class="list">
-    <a class="card" href="https://github.com/aidarpavl/-young_teacher/blob/main/raspisanie_kruzhkov.html" target="_blank" rel="noopener">Расписание кружков</a>
-    <a class="card" href="https://github.com/aidarpavl/-young_teacher/blob/main/journal.html" target="_blank" rel="noopener">Посещение уроков наставника</a>
-    <a class="card" href="https://github.com/aidarpavl/-young_teacher/blob/main/poseshenie_new.html" target="_blank" rel="noopener">Посещение уроков коллег</a>
-    <a class="card" href="https://github.com/aidarpavl/-young_teacher/blob/main/padlet-takta.html" target="_blank" rel="noopener">Падлет доска</a>
-    <a class="card" href="https://github.com/aidarpavl/-young_teacher/blob/main/voice_tool.html" target="_blank" rel="noopener">Писать с помощью ИИ</a>
+    <a class="card" href="https://raw.githack.com/aidarpavl/-young_teacher/main/raspisanie_kruzhkov.html" target="_blank" rel="noopener">Расписание кружков</a>
+    <a class="card" href="https://raw.githack.com/aidarpavl/-young_teacher/main/journal.html" target="_blank" rel="noopener">Посещение уроков наставника</a>
+    <a class="card" href="https://raw.githack.com/aidarpavl/-young_teacher/main/poseshenie_new.html" target="_blank" rel="noopener">Посещение уроков коллег</a>
+    <a class="card" href="https://raw.githack.com/aidarpavl/-young_teacher/main/padlet-takta.html" target="_blank" rel="noopener">Падлет доска</a>
+    <a class="card" href="https://raw.githack.com/aidarpavl/-young_teacher/main/voice_tool.html" target="_blank" rel="noopener">Писать с помощью ИИ</a>
     <a class="card" href="https://script.google.com/macros/s/AKfycbzr6dGgQzQPngbA2wcnbO6yv-x9M3tYcwi4gkrBxBgLeF38866HB1P1GnOQfHNc0ELQQw/exec" target="_blank" rel="noopener">Сынып жетекшілік.Оқушыларды белгілеу</a>
     <a class="card" href="https://stolovaia-zhd-school30.streamlit.app/" target="_blank" rel="noopener">Асханаға өтінім беру</a>
   </div>
