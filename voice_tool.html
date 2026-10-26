@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Дауыс → Мәтін · Дауыстық іздеу</title>
+<style>
+  :root {
+    --bg: #f3f5fb; --card: #fff; --ink: #1c2333; --muted: #6b7690; --line: #dfe4f0;
+    --brand: #4f46e5; --brand2: #7c3aed; --ok: #16a34a; --danger: #e11d48; --soft: #eef0ff;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.5; }
+  header { background: linear-gradient(120deg, var(--brand), var(--brand2)); color: #fff; padding: 26px 18px 70px; text-align: center; }
+  header h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: .3px; }
+  header p { margin: 0; opacity: .9; font-size: 14px; }
+  main { max-width: 1100px; margin: -48px auto 40px; padding: 0 14px; display: grid; gap: 22px; }
+  .card { background: var(--card); border-radius: 18px; box-shadow: 0 8px 28px rgba(40,50,120,.12); padding: 20px 22px 22px; }
+  .card h2 { margin: 0 0 4px; font-size: 19px; display: flex; align-items: center; gap: 10px; }
+  .card h2 .badge { background: var(--soft); color: var(--brand); width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; }
+  .sub { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+  .toolbar .grow { flex: 1; }
+  select, input[type=text] { font: inherit; font-size: 14px; border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; background: #fff; color: var(--ink); outline: none; }
+  select:focus, input[type=text]:focus, textarea:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(79,70,229,.15); }
+  input[type=text] { flex: 1; min-width: 200px; }
+  textarea { width: 100%; min-height: 210px; resize: vertical; font: inherit; font-size: 15px; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; outline: none; line-height: 1.6; }
+
+  button { font: inherit; font-size: 14px; border: none; border-radius: 10px; padding: 10px 16px; cursor: pointer; color: #fff; background: var(--brand); transition: filter .15s, transform .05s; display: inline-flex; align-items: center; gap: 7px; }
+  button:hover:not(:disabled) { filter: brightness(1.1); }
+  button:active:not(:disabled) { transform: translateY(1px); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  button.ghost { background: var(--soft); color: var(--brand); }
+  button.gray { background: #e8ebf3; color: #3b4660; }
+  button.word { background: #2b579a; }
+  button.ppt { background: #d24726; }
+  button.speak { background: var(--ok); }
+  button.on { background: var(--danger) !important; color: #fff !important; }
+  button.bigmic { width: 52px; height: 52px; border-radius: 50%; padding: 0; justify-content: center; font-size: 22px; background: linear-gradient(135deg, var(--brand), var(--brand2)); box-shadow: 0 4px 14px rgba(79,70,229,.4); }
+  button.bigmic.on { animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(225,29,72,.5); } 50% { box-shadow: 0 0 0 12px rgba(225,29,72,0); } }
+
+  .status { font-size: 13px; color: var(--muted); min-height: 20px; margin-top: 8px; }
+  .exportbar { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .exportbar span { color: var(--muted); font-size: 13px; margin-right: 4px; }
+
+  .voicebar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: #f8f9fe; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-bottom: 18px; font-size: 13px; }
+  .voicebar label { color: var(--muted); }
+  .voicebar select { max-width: 320px; }
+  .voicebar input[type=range] { width: 110px; accent-color: var(--brand); }
+  #voiceInfo { color: var(--ok); font-weight: 600; }
+
+  #resultBox { margin-top: 16px; display: none; border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; background: #fcfcff; }
+  #resultBox h3 { margin: 0 0 4px; font-size: 20px; }
+  .meta { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .meta a { color: var(--brand); }
+  .resbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 12px; }
+  #resText p { margin: 0 0 10px; font-size: 15px; text-align: justify; }
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; margin-top: 12px; }
+  .gallery figure { margin: 0; background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .gallery img { width: 100%; height: 150px; object-fit: cover; display: block; cursor: zoom-in; background: #eef0f6; }
+  .gallery figcaption { font-size: 11px; color: var(--muted); padding: 5px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+  .chips span { font-size: 12px; color: var(--muted); }
+  .chip { background: var(--soft); color: var(--brand); border-radius: 20px; padding: 5px 12px; font-size: 13px; cursor: pointer; border: none; }
+  .hintbox { font-size: 12.5px; color: var(--muted); background: #f8f9fe; border-radius: 10px; padding: 9px 12px; margin-top: 10px; }
+
+  #toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: rgba(28,35,51,.94); color: #fff; padding: 10px 18px; border-radius: 22px; font-size: 14px; display: none; z-index: 200; max-width: 92%; text-align: center; }
+  #lightbox { position: fixed; inset: 0; background: rgba(10,14,30,.88); display: none; align-items: center; justify-content: center; z-index: 150; cursor: zoom-out; }
+  #lightbox img { max-width: 94%; max-height: 92%; border-radius: 10px; }
+  @media (max-width: 640px) { header h1 { font-size: 21px; } .card { padding: 16px 14px 18px; } button { padding: 10px 13px; } }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎙️ Дауыс → Мәтін &nbsp;|&nbsp; 🔎 Дауыстық іздеу</h1>
+  <p>Сөйлеңіз — мәтінге айналады. Бұйрық беріңіз — интернеттен ақпарат пен фото табылады. Нәтижені дикторға оқытыңыз.</p>
+</header>
+
+<main>
+
+  <!-- Дикторды таңдау (екі бөлікке ортақ) -->
+  <div class="voicebar" style="margin:0;">
+    <label for="voiceSel">🔊 Диктор:</label>
+    <select id="voiceSel"><option value="auto">Авто (Айгүл / қазақша, орысша дикторлар)</option></select>
+    <label for="rate">Жылдамдық</label>
+    <input type="range" id="rate" min="0.6" max="1.6" step="0.1" value="1">
+    <span id="voiceInfo"></span>
+  </div>
+
+  <!-- ===================== 1-БӨЛІК ===================== -->
+  <section class="card" id="sec1">
+    <h2><span class="badge">1</span> Дауысты мәтінге айналдыру</h2>
+    <p class="sub">🎤 басып сөйлеңіз — мәтін төменде пайда болады. Оны пернетақтамен өңдеуге немесе өз бетіңізше жазуға болады.</p>
+
+    <div class="toolbar">
+      <button class="bigmic" id="mic1" title="Жазуды бастау / тоқтату">🎤</button>
+      <select id="lang1">
+        <option value="kk-KZ">Қазақша</option>
+        <option value="ru-RU">Русский</option>
+        <option value="en-US">English</option>
+      </select>
+      <button class="speak" id="speak1">🔊 Мәтінді оқып беру</button>
+      <button class="ghost" id="copy1">📋 Көшіру</button>
+      <button class="gray" id="clear1">🗑 Тазалау</button>
+    </div>
+    <textarea id="text1" placeholder="Осы жерге мәтін жазылады... Сіз де пернетақтамен жаза аласыз."></textarea>
+    <div class="status" id="status1"></div>
+
+    <div class="exportbar">
+      <span>Осы бөлімді сақтау:</span>
+      <button class="word" id="word1">📄 Word (.docx)</button>
+      <button class="ppt" id="ppt1">📊 Презентация (.pptx)</button>
+    </div>
+  </section>
+
+  <!-- ===================== 2-БӨЛІК ===================== -->
+  <section class="card" id="sec2">
+    <h2><span class="badge">2</span> Дауыспен іздеу және бұйрықтар</h2>
+    <p class="sub">🎤 басып сұрағыңызды айтыңыз, мысалы: «Абай Құнанбайұлы туралы айтып бер», «найди информацию про Байконур». Нәтиже мәтін мен суреттермен шығады.</p>
+
+    <div class="toolbar">
+      <button class="bigmic" id="mic2" title="Бұйрықты тыңдау">🎤</button>
+      <select id="lang2">
+        <option value="kk-KZ">Қазақша</option>
+        <option value="ru-RU">Русский</option>
+        <option value="en-US">English</option>
+      </select>
+      <input type="text" id="query" placeholder="Сұрақ немесе бұйрық жазыңыз немесе айтыңыз...">
+      <button id="searchBtn">🔎 Іздеу</button>
+    </div>
+    <div class="status" id="status2"></div>
+    <div class="hintbox">
+      Дауыстық бұйрықтар: <b>«… туралы айтып бер / найди …»</b> — іздеу · <b>«оқып бер / прочитай»</b> — нәтижені оқу ·
+      <b>«тоқта / стоп»</b> — оқуды тоқтату · <b>«тазала / очисти»</b> — тазалау ·
+      <b>«Word-қа сақта / сохрани в ворд»</b> · <b>«презентацияға сақта / сохрани презентацию»</b>.
+    </div>
+
+    <div id="resultBox">
+      <h3 id="resTitle"></h3>
+      <div class="meta" id="resMeta"></div>
+      <div class="resbar">
+        <button class="speak" id="speak2">🔊 Нәтижені оқып беру</button>
+      </div>
+      <div id="resText"></div>
+      <div class="gallery" id="resGallery"></div>
+      <div class="chips" id="resRelated"></div>
+    </div>
+
+    <div class="exportbar">
+      <span>Осы бөлімді сақтау:</span>
+      <button class="word" id="word2">📄 Word (.docx)</button>
+      <button class="ppt" id="ppt2">📊 Презентация (.pptx)</button>
+    </div>
+  </section>
+
+</main>
+
+<div id="toast"></div>
+<div id="lightbox"><img alt=""></div>
+
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+<script>
+/* ============================================================
+   ЖАЛПЫ КӨМЕКШІ ФУНКЦИЯЛАР
+   ============================================================ */
+const $ = id => document.getElementById(id);
+let toastTimer = null;
+function toast(msg, ms = 3200) {
+  const t = $('toast'); t.textContent = msg; t.style.display = 'block';
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.style.display = 'none', ms);
+}
+
+function detectLang(text) {
+  if (/[әіңғүұқөһӘІҢҒҮҰҚӨҺ]/.test(text)) return 'kk';
+  if (/[а-яёА-ЯЁ]/.test(text)) return 'ru';
+  return 'en';
+}
+
+function downloadBlob(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+
+function splitSentences(text, max) {
+  const parts = text.replace(/\r/g, '').split(/(?<=[.!?…])\s+|\n+/).map(s => s.trim()).filter(Boolean);
+  const out = []; let cur = '';
+  const push = s => { if (s) out.push(s); };
+  for (let p of parts) {
+    while (p.length > max) {            // өте ұзын сөйлемді бөлу
+      let cut = p.lastIndexOf(',', max); if (cut < max * 0.4) cut = p.lastIndexOf(' ', max);
+      if (cut < 1) cut = max;
+      if (cur) { push(cur); cur = ''; }
+      push(p.slice(0, cut + 1).trim()); p = p.slice(cut + 1).trim();
+    }
+    if ((cur + ' ' + p).trim().length > max) { push(cur); cur = p; }
+    else cur = (cur + ' ' + p).trim();
+  }
+  push(cur);
+  return out;
+}
+
+/* ============================================================
+   ДИКТОР (TTS): Айгүл және басқа қазақша/орысша дикторлар
+   ============================================================ */
+const voiceSel = $('voiceSel');
+let voices = [];
+let speakToken = 0, speakingBtn = null, curAudio = null;
+
+const vlang = v => (v.lang || '').toLowerCase().replace('_', '-');
+
+function scoreVoice(v) {
+  let s = 0;
+  if (/aigul|айгүл|айгуль|daulet|даулет/i.test(v.name)) s += 100;
+  if (/svetlana|светлана|dmitry|дмитрий|katya|екатерина|milena|yuri/i.test(v.name)) s += 30;
+  if (/natural|online/i.test(v.name)) s += 50;
+  if (/google/i.test(v.name)) s += 20;
+  return s;
+}
+function bestLocal(code) {
+  const c = voices.filter(v => vlang(v).startsWith(code));
+  if (!c.length) return null;
+  return c.sort((a, b) => scoreVoice(b) - scoreVoice(a))[0];
+}
+
+function fillVoiceSel() {
+  voices = speechSynthesis.getVoices();
+  const prev = voiceSel.value;
+  voiceSel.innerHTML = '<option value="auto">Авто (Айгүл / қазақша, орысша дикторлар)</option>';
+  const og1 = document.createElement('optgroup'); og1.label = 'Құрылғыдағы / браузердегі дикторлар';
+  voices.filter(v => /^(kk|ru|en)/.test(vlang(v)))
+        .sort((a, b) => (/^kk/.test(vlang(b)) - /^kk/.test(vlang(a))) || scoreVoice(b) - scoreVoice(a))
+        .forEach(v => { const o = document.createElement('option'); o.value = 'v:' + v.name; o.textContent = v.name + ' (' + v.lang + ')'; og1.appendChild(o); });
+  if (og1.children.length) voiceSel.appendChild(og1);
+  const og2 = document.createElement('optgroup'); og2.label = 'Онлайн дикторлар (интернет керек)';
+  [['g:kk', 'Онлайн диктор — қазақша'], ['g:ru', 'Онлайн диктор — русский'], ['g:en', 'Online voice — English']].forEach(([v, t]) => {
+    const o = document.createElement('option'); o.value = v; o.textContent = t; og2.appendChild(o);
+  });
+  voiceSel.appendChild(og2);
+  if ([...voiceSel.options].some(o => o.value === prev)) voiceSel.value = prev;
+  const kk = bestLocal('kk');
+  $('voiceInfo').textContent = kk ? '✔ Қазақша диктор: ' + kk.name : '';
+}
+if ('speechSynthesis' in window) {
+  speechSynthesis.onvoiceschanged = fillVoiceSel;
+  fillVoiceSel();
+  setTimeout(fillVoiceSel, 800);
+}
+
+function setSpeakingUI(btn) {
+  document.querySelectorAll('button.speak').forEach(b => {
+    b.classList.remove('on');
+    if (b.dataset.label) b.textContent = b.dataset.label;
+  });
+  speakingBtn = btn;
+  if (btn) { btn.classList.add('on'); btn.textContent = '⏹ Тоқтату'; }
+}
+document.querySelectorAll('button.speak').forEach(b => b.dataset.label = b.textContent);
+
+function stopSpeak() {
+  speakToken++;
+  try { speechSynthesis.cancel(); } catch (e) {}
+  if (curAudio) { try { curAudio.pause(); } catch (e) {} curAudio = null; }
+  setSpeakingUI(null);
+}
+
+function playLocalChunk(text, voice, token) {
+  return new Promise(resolve => {
+    if (token !== speakToken) return resolve();
+    const u = new SpeechSynthesisUtterance(text);
+    u.voice = voice; u.lang = voice.lang; u.rate = parseFloat($('rate').value);
+    u.onend = u.onerror = () => resolve();
+    speechSynthesis.speak(u);
+  });
+}
+function playOnlineChunk(text, code, token) {
+  return new Promise((resolve, reject) => {
+    if (token !== speakToken) return resolve();
+    const url = 'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=' + code + '&q=' + encodeURIComponent(text);
+    const a = new Audio(url); curAudio = a;
+    a.playbackRate = parseFloat($('rate').value);
+    a.onended = () => resolve();
+    a.onerror = () => reject(new Error('online-tts'));
+    a.play().catch(reject);
+  });
+}
+
+async function speakText(text, btn) {
+  if (speakingBtn === btn) { stopSpeak(); return; }
+  stopSpeak();
+  text = (text || '').trim();
+  if (!text) { toast('Оқитын мәтін жоқ'); return; }
+  const token = ++speakToken;
+  setSpeakingUI(btn);
+
+  const sel = voiceSel.value;
+  const code = detectLang(text);
+  let mode = 'local', voice = null, online = code;
+
+  if (sel.startsWith('v:')) {
+    voice = voices.find(v => v.name === sel.slice(2));
+  } else if (sel.startsWith('g:')) {
+    mode = 'online'; online = sel.slice(2);
+  } else {                         // АВТО
+    voice = bestLocal(code);
+    if (!voice && code === 'kk') mode = 'online';          // қазақша жергілікті диктор жоқ → онлайн
+    if (!voice && code !== 'kk') { voice = bestLocal(code); if (!voice) mode = 'online'; }
+  }
+  if (mode === 'local' && !voice) mode = 'online';
+
+  const chunks = splitSentences(text, mode === 'online' ? 180 : 220);
+  $('voiceInfo').textContent = '🔊 ' + (mode === 'online' ? 'Онлайн диктор (' + online + ')' : voice.name);
+
+  try {
+    for (const ch of chunks) {
+      if (token !== speakToken) return;
+      if (mode === 'online') await playOnlineChunk(ch, online, token);
+      else await playLocalChunk(ch, voice, token);
+    }
+  } catch (e) {
+    toast('⚠️ Онлайн диктор қолжетімсіз. Басқа дикторды таңдаңыз немесе интернетті тексеріңіз.', 4500);
+  }
+  if (token === speakToken) setSpeakingUI(null);
+}
+
+/* ============================================================
+   ДАУЫС ТАНУ (STT)
+   ============================================================ */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+const errMap = {
+  'not-allowed': 'Микрофонға рұқсат берілмеді. Браузер баптауынан рұқсат беріңіз (бет HTTPS арқылы ашылуы керек).',
+  'service-not-allowed': 'Дауыс тану қызметі рұқсат етілмеген. Бетті HTTPS арқылы ашыңыз.',
+  'audio-capture': 'Микрофон табылмады.',
+  'network': 'Интернет байланысы жоқ.'
+};
+
+/* --- 1-бөлім: үздіксіз жазу --- */
+let rec1 = null, manual1 = true, base1 = '', cur1 = '';
+const ta1 = $('text1');
+
+function stopRec1(msg) {
+  manual1 = true;
+  const r = rec1; rec1 = null;
+  $('mic1').classList.remove('on');
+  if (r) { try { r.stop(); } catch (e) {} }
+  $('status1').textContent = msg || 'Жазу тоқтатылды.';
+}
+function startRec1() {
+  if (!SR) { $('status1').textContent = '⚠️ Бұл браузер дауыс тануды қолдамайды. Chrome немесе Edge қолданыңыз.'; return; }
+  if (rec1) { stopRec1(); return; }
+  const r = new SR();
+  r.lang = $('lang1').value; r.continuous = false; r.interimResults = true; r.maxAlternatives = 1;
+  rec1 = r; manual1 = false; cur1 = '';
+  base1 = ta1.value ? ta1.value.replace(/\s+$/, '') + ' ' : '';
+  r.onstart = () => { $('mic1').classList.add('on'); $('status1').textContent = '🎤 Тыңдап тұрмын... сөйлеңіз'; };
+  r.onresult = e => {
+    if (r !== rec1) return;
+    let t = ''; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+    cur1 = t; ta1.value = base1 + cur1;
+  };
+  r.onerror = e => { if (r === rec1 && errMap[e.error]) stopRec1('⚠️ ' + errMap[e.error]); };
+  r.onend = () => {
+    if (r !== rec1) return;
+    if (cur1) { base1 += cur1.trim() + ' '; cur1 = ''; }
+    if (!manual1) setTimeout(() => { if (r === rec1 && !manual1) { try { r.start(); } catch (e) { stopRec1('⚠️ ' + e.message); } } }, 250);
+  };
+  try { r.start(); } catch (e) { stopRec1('⚠️ ' + e.message); }
+}
+$('mic1').addEventListener('click', startRec1);
+$('lang1').addEventListener('change', () => { if (rec1) { stopRec1(); } });
+$('speak1').addEventListener('click', () => speakText(ta1.value, $('speak1')));
+$('copy1').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(ta1.value); toast('Көшірілді ✔'); }
+  catch (e) { ta1.select(); document.execCommand('copy'); toast('Көшірілді ✔'); }
+});
+$('clear1').addEventListener('click', () => { if (rec1) stopRec1(); stopSpeak(); ta1.value = ''; $('status1').textContent = ''; });
+
+/* --- 2-бөлім: бір реттік бұйрық --- */
+let rec2 = null;
+function startRec2() {
+  if (!SR) { $('status2').textContent = '⚠️ Бұл браузер дауыс тануды қолдамайды. Chrome немесе Edge қолданыңыз.'; return; }
+  if (rec2) { try { rec2.stop(); } catch (e) {} return; }
+  stopSpeak();
+  const r = new SR();
+  r.lang = $('lang2').value; r.continuous = false; r.interimResults = true; r.maxAlternatives = 1;
+  rec2 = r; let finalText = '';
+  r.onstart = () => { $('mic2').classList.add('on'); $('status2').textContent = '🎤 Бұйрықты айтыңыз...'; };
+  r.onresult = e => {
+    let t = ''; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+    finalText = t; $('query').value = t;
+  };
+  r.onerror = e => { if (errMap[e.error]) $('status2').textContent = '⚠️ ' + errMap[e.error]; else if (e.error === 'no-speech') $('status2').textContent = 'Дауыс естілмеді, қайталаңыз.'; };
+  r.onend = () => {
+    $('mic2').classList.remove('on'); rec2 = null;
+    if (finalText.trim()) handleCommand(finalText.trim());
+  };
+  try { r.start(); } catch (e) { rec2 = null; $('status2').textContent = '⚠️ ' + e.message; }
+}
+$('mic2').addEventListener('click', startRec2);
+$('searchBtn').addEventListener('click', () => { const q = $('query').value.trim(); if (q) handleCommand(q); });
+$('query').addEventListener('keydown', e => { if (e.key === 'Enter') $('searchBtn').click(); });
+
+/* ============================================================
+   БҰЙРЫҚТАРДЫ ТАНУ
+   ============================================================ */
+function handleCommand(text) {
+  const lc = text.toLowerCase().replace(/[.,!?]+$/g, '').trim();
+
+  if (/^(тоқта|тоқтат|стоп|остановись|остановить|хватит)/.test(lc)) { stopSpeak(); $('status2').textContent = 'Оқу тоқтатылды.'; return; }
+  if (/^(тазала|өшір|очисти|очистить|сотри)/.test(lc)) { clearResult(); $('query').value = ''; $('status2').textContent = 'Тазаланды.'; return; }
+  if (/(сақта|сохрани)/.test(lc) && /(word|ворд|вор д)/.test(lc)) { exportWord(2); return; }
+  if (/(сақта|сохрани)/.test(lc) && /(презентац|слайд|powerpoint|пауэр)/.test(lc)) { exportPptx(2); return; }
+  if (/^(оқып бер|оқы|прочитай|прочти|читай|озвучь)/.test(lc)) {
+    if (!state.result) { toast('Алдымен ақпарат іздеңіз'); return; }
+    speakText(resultPlainText(), $('speak2')); return;
+  }
+  runSearch(cleanQuery(text));
+}
+
+function cleanQuery(t) {
+  let q = t.trim();
+  const rules = [
+    /^(пожалуйста|өтінемін|ал|ну)[, ]+/i,
+    /^(найди|найти|поищи|поиск|покажи|расскажи|рассказать|скажи|дай)( мне)?( информацию| инфо| данные)?( про| о| об| по теме| на тему)?\s+/i,
+    /^(что такое|кто такой|кто такая|что за|что значит)\s+/i,
+    /^(интернеттен|интернетте)?\s*(іздеп бер|тауып бер|тап|көрсет|айтып бер)\s+/i,
+    /(туралы|жайлы|жөнінде|туралы ақпарат|туралы мәлімет|туралы айтып бер|туралы тауып бер|туралы іздеп бер|деген не|кім|қандай)$/i,
+    /\s+(іздеп бер|тауып бер|айтып бер|көрсетші|көрсет|найди|расскажи)$/i
+  ];
+  for (let i = 0; i < 3; i++) rules.forEach(r => { q = q.replace(r, '').trim(); });
+  return q || t.trim();
+}
+
+/* ============================================================
+   ИНТЕРНЕТТЕН ІЗДЕУ (Wikipedia + Wikimedia Commons — ашық API)
+   ============================================================ */
+const state = { result: null };
+const WIKI = l => 'https://' + l + '.wikipedia.org/w/api.php';
+
+async function api(url, params) {
+  const u = new URL(url);
+  Object.entries({ format: 'json', origin: '*', ...params }).forEach(([k, v]) => u.searchParams.set(k, v));
+  const r = await fetch(u);
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
+const BAD_IMG = /flag|logo|icon|commons-|symbol|stub|wiki|edit|question|ambox|padlock|oojs|increase|decrease|blank|map_pin|location|disambig|\.svg/i;
+function pickImages(pages) {
+  const out = [];
+  Object.values(pages || {}).forEach(p => {
+    const ii = p.imageinfo && p.imageinfo[0];
+    if (!ii) return;
+    if (!/^image\/(jpeg|png|webp|gif)$/.test(ii.mime || '')) return;
+    if ((ii.width || 0) < 200 || (ii.height || 0) < 150) return;
+    if (BAD_IMG.test(p.title)) return;
+    out.push({ url: ii.thumburl || ii.url, full: ii.url, title: p.title.replace(/^(File|Файл|Сурет):/i, '').replace(/\.[a-z]+$/i, '').replace(/_/g, ' ') });
+  });
+  return out;
+}
+
+async function wikiFetch(lang, query) {
+  const s = await api(WIKI(lang), { action: 'query', list: 'search', srsearch: query, srlimit: 6 });
+  const hits = (s.query && s.query.search) || [];
+  if (!hits.length) return null;
+  const title = hits[0].title;
+
+  const [pg, im] = await Promise.all([
+    api(WIKI(lang), { action: 'query', prop: 'extracts|pageimages|info', exchars: 4000, explaintext: 1, exsectionformat: 'plain',
+                      piprop: 'thumbnail', pithumbsize: 700, inprop: 'url', redirects: 1, titles: title }),
+    api(WIKI(lang), { action: 'query', generator: 'images', gimlimit: 30, titles: title, prop: 'imageinfo', iiprop: 'url|mime|size', iiurlwidth: 640 })
+      .catch(() => ({}))
+  ]);
+  const page = Object.values(pg.query.pages)[0];
+  let images = pickImages(im.query && im.query.pages);
+  if (page.thumbnail && page.thumbnail.source) {
+    const nm = page.thumbnail.source.split('/').slice(-2, -1)[0] || '';
+    if (!images.some(i => decodeURIComponent(i.url).includes(decodeURIComponent(nm)))) images.unshift({ url: page.thumbnail.source, full: page.thumbnail.source, title: page.title });
+  }
+  return {
+    lang, title: page.title, text: (page.extract || '').trim(), url: page.fullurl,
+    images, related: hits.slice(1).map(h => h.title)
+  };
+}
+
+async function commonsImages(query) {
+  try {
+    const d = await api('https://commons.wikimedia.org/w/api.php', {
+      action: 'query', generator: 'search', gsrsearch: query + ' filetype:bitmap', gsrnamespace: 6, gsrlimit: 12,
+      prop: 'imageinfo', iiprop: 'url|mime|size', iiurlwidth: 640
+    });
+    return pickImages(d.query && d.query.pages);
+  } catch (e) { return []; }
+}
+
+function trimText(t, max = 3500) {
+  t = t.replace(/\n{3,}/g, '\n\n').trim();
+  if (t.length <= max) return t;
+  const cut = t.slice(0, max); const i = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('.\n'));
+  return (i > max * 0.5 ? cut.slice(0, i + 1) : cut) .trim();
+}
+
+async function runSearch(query) {
+  if (!query) return;
+  stopSpeak();
+  $('query').value = query;
+  $('status2').textContent = '🔎 «' + query + '» іздеп жатырмын...';
+  const first = detectLang(query);
+  const order = { kk: ['kk', 'ru', 'en'], ru: ['ru', 'kk', 'en'], en: ['en', 'ru', 'kk'] }[first];
+  let best = null;
+  try {
+    for (const l of order) {
+      let r = null;
+      try { r = await wikiFetch(l, query); } catch (e) { r = null; }
+      if (!r || !r.text) continue;
+      if (!best || r.text.length > best.text.length) best = r;
+      if (r.text.length >= 400) break;
+    }
+  } catch (e) {}
+  if (!best) { $('status2').textContent = '😕 Ештеңе табылмады. Басқаша тұжырымдап көріңіз.'; return; }
+
+  if (best.images.length < 4) {
+    const extra = await commonsImages(best.title);
+    extra.forEach(x => { if (!best.images.some(i => i.url === x.url)) best.images.push(x); });
+  }
+  best.images = best.images.slice(0, 8);
+  best.text = trimText(best.text);
+  state.result = { query, ...best };
+  renderResult();
+  $('status2').textContent = '✔ Табылды: ' + best.title + ' (' + best.lang.toUpperCase() + ' Wikipedia)';
+  $('resultBox').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resultPlainText() {
+  const r = state.result; return r ? r.title + '. ' + r.text : '';
+}
+
+function renderResult() {
+  const r = state.result;
+  $('resultBox').style.display = 'block';
+  $('resTitle').textContent = r.title;
+  $('resMeta').innerHTML = '';
+  const a = document.createElement('a'); a.href = r.url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Дереккөз: ' + r.lang + '.wikipedia.org';
+  $('resMeta').append('Сұраныс: «' + r.query + '» · ', a);
+  const box = $('resText'); box.innerHTML = '';
+  r.text.split(/\n+/).filter(Boolean).forEach(p => { const el = document.createElement('p'); el.textContent = p; box.appendChild(el); });
+  const g = $('resGallery'); g.innerHTML = '';
+  r.images.forEach(im => {
+    const f = document.createElement('figure');
+    const img = document.createElement('img'); img.src = im.url; img.alt = im.title; img.loading = 'lazy'; img.referrerPolicy = 'no-referrer';
+    img.onerror = () => f.remove();
+    img.onclick = () => { $('lightbox').querySelector('img').src = im.full || im.url; $('lightbox').style.display = 'flex'; };
+    const c = document.createElement('figcaption'); c.textContent = im.title;
+    f.append(img, c); g.appendChild(f);
+  });
+  const rel = $('resRelated'); rel.innerHTML = '';
+  if (r.related.length) {
+    const s = document.createElement('span'); s.textContent = 'Ұқсас тақырыптар:'; rel.appendChild(s);
+    r.related.forEach(t => { const b = document.createElement('button'); b.className = 'chip'; b.textContent = t; b.onclick = () => runSearch(t); rel.appendChild(b); });
+  }
+}
+
+function clearResult() {
+  stopSpeak(); state.result = null;
+  $('resultBox').style.display = 'none';
+  $('resText').innerHTML = ''; $('resGallery').innerHTML = ''; $('resRelated').innerHTML = '';
+}
+$('speak2').addEventListener('click', () => speakText(resultPlainText(), $('speak2')));
+$('lightbox').addEventListener('click', () => $('lightbox').style.display = 'none');
+
+/* ============================================================
+   САҚТАУ: WORD (.docx) және ПРЕЗЕНТАЦИЯ (.pptx) — әр бөлім жеке
+   ============================================================ */
+function getSection(n) {
+  if (n === 1) {
+    const text = ta1.value.trim();
+    return text ? { title: 'Дауыстан мәтінге', text, images: [], source: '' } : null;
+  }
+  const r = state.result;
+  return r ? { title: r.title, text: r.text, images: r.images, source: r.url || '', query: r.query } : null;
+}
+
+function fetchImg(url) {
+  return fetch(url).then(r => { if (!r.ok) throw 0; return r.blob(); }).then(blob => new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => {
+      const dataUrl = fr.result; const im = new Image();
+      im.onload = () => blob.arrayBuffer().then(buf => res({
+        dataUrl, bytes: new Uint8Array(buf), w: im.naturalWidth, h: im.naturalHeight,
+        type: /png/.test(blob.type) ? 'png' : /gif/.test(blob.type) ? 'gif' : 'jpg'
+      }));
+      im.onerror = rej; im.src = dataUrl;
+    };
+    fr.onerror = rej; fr.readAsDataURL(blob);
+  }));
+}
+async function loadImages(list) {
+  const out = [];
+  for (const im of list) { try { const d = await fetchImg(im.url); d.title = im.title; out.push(d); } catch (e) {} }
+  return out;
+}
+const stamp = () => new Date().toISOString().slice(0, 10);
+
+/* ---------- WORD ---------- */
+async function exportWord(n) {
+  const sec = getSection(n);
+  if (!sec) { toast(n === 1 ? 'Алдымен мәтін жазыңыз' : 'Алдымен ақпарат іздеңіз'); return; }
+  toast('📄 Word файлы дайындалуда...', 8000);
+  const imgs = await loadImages(sec.images);
+  const fname = (n === 1 ? 'Дауыс_мәтін_' : 'Іздеу_нәтижесі_') + stamp();
+
+  if (window.docx) {
+    try {
+      const { Document, Packer, Paragraph, TextRun, HeadingLevel, ImageRun, AlignmentType } = window.docx;
+      const kids = [new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun({ text: sec.title, bold: true })] })];
+      if (sec.query) kids.push(new Paragraph({ children: [new TextRun({ text: 'Сұраныс: ' + sec.query, italics: true, color: '666666' })] }));
+      sec.text.split(/\n+/).filter(Boolean).forEach(p =>
+        kids.push(new Paragraph({ spacing: { after: 140 }, alignment: AlignmentType.JUSTIFIED, children: [new TextRun({ text: p, size: 24 })] })));
+      imgs.forEach(d => {
+        const w = Math.min(480, d.w), h = Math.round(w * d.h / d.w);
+        kids.push(new Paragraph({ spacing: { before: 160 }, children: [new ImageRun({ data: d.bytes, type: d.type, transformation: { width: w, height: h } })] }));
+        kids.push(new Paragraph({ children: [new TextRun({ text: d.title, italics: true, size: 18, color: '777777' })] }));
+      });
+      if (sec.source) kids.push(new Paragraph({ spacing: { before: 200 }, children: [new TextRun({ text: 'Дереккөз: ' + sec.source, size: 18, color: '4f46e5' })] }));
+      const doc = new Document({ sections: [{ children: kids }] });
+      const blob = await Packer.toBlob(doc);
+      downloadBlob(blob, fname + '.docx'); toast('✔ Word сақталды'); return;
+    } catch (e) { console.warn('docx қатесі, HTML-Word қолданылады', e); }
+  }
+
+  // Қор нұсқасы: Word ашатын HTML (.doc)
+  const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  let body = '<h1>' + esc(sec.title) + '</h1>';
+  sec.text.split(/\n+/).filter(Boolean).forEach(p => body += '<p>' + esc(p) + '</p>');
+  imgs.forEach(d => body += '<p><img src="' + d.dataUrl + '" width="' + Math.min(480, d.w) + '"><br><i>' + esc(d.title) + '</i></p>');
+  if (sec.source) body += '<p>Дереккөз: ' + esc(sec.source) + '</p>';
+  const html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>body{font-family:Calibri,Arial;font-size:12pt}</style></head><body>' + body + '</body></html>';
+  downloadBlob(new Blob(['﻿', html], { type: 'application/msword' }), fname + '.doc');
+  toast('✔ Word сақталды (.doc)');
+}
+
+/* ---------- ПРЕЗЕНТАЦИЯ ---------- */
+function fit(w, h, bw, bh) {
+  const r = w / h; let ww, hh;
+  if (r > bw / bh) { ww = bw; hh = bw / r; } else { hh = bh; ww = bh * r; }
+  return { w: ww, h: hh };
+}
+async function exportPptx(n) {
+  const sec = getSection(n);
+  if (!sec) { toast(n === 1 ? 'Алдымен мәтін жазыңыз' : 'Алдымен ақпарат іздеңіз'); return; }
+  if (!window.PptxGenJS) { toast('⚠️ PptxGenJS кітапханасы жүктелмеді. Интернетті тексеріңіз.', 4500); return; }
+  toast('📊 Презентация дайындалуда...', 10000);
+  const imgs = await loadImages(sec.images);
+  const pptx = new PptxGenJS();
+  pptx.layout = 'LAYOUT_16x9';
+
+  const s0 = pptx.addSlide(); s0.background = { color: '312E81' };
+  s0.addText(sec.title, { x: 0.6, y: 1.6, w: 8.8, h: 1.4, fontSize: 36, bold: true, color: 'FFFFFF', align: 'center', fit: 'shrink' });
+  s0.addText(n === 1 ? 'Дауыстан алынған мәтін' : 'Интернеттен табылған ақпарат', { x: 0.6, y: 3.1, w: 8.8, h: 0.5, fontSize: 18, color: 'C7D2FE', align: 'center' });
+  s0.addText(stamp(), { x: 0.6, y: 3.7, w: 8.8, h: 0.4, fontSize: 14, color: 'A5B4FC', align: 'center' });
+
+  const chunks = []; let cur = '';
+  splitSentences(sec.text, 400).forEach(s => { if ((cur + ' ' + s).length > 650) { chunks.push(cur); cur = s; } else cur = (cur + ' ' + s).trim(); });
+  if (cur) chunks.push(cur);
+  chunks.forEach((c, i) => {
+    const s = pptx.addSlide();
+    s.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 10, h: 0.7, fill: { color: '4F46E5' } });
+    s.addText(sec.title + (chunks.length > 1 ? '  (' + (i + 1) + '/' + chunks.length + ')' : ''), { x: 0.4, y: 0.08, w: 9.2, h: 0.55, fontSize: 18, bold: true, color: 'FFFFFF', fit: 'shrink' });
+    s.addText(c, { x: 0.5, y: 0.95, w: 9, h: 4.4, fontSize: 18, color: '1F2937', valign: 'top', fit: 'shrink', paraSpaceAfter: 6 });
+  });
+
+  imgs.forEach(d => {
+    const s = pptx.addSlide();
+    s.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 10, h: 0.7, fill: { color: '4F46E5' } });
+    s.addText(sec.title, { x: 0.4, y: 0.08, w: 9.2, h: 0.55, fontSize: 18, bold: true, color: 'FFFFFF', fit: 'shrink' });
+    const f = fit(d.w, d.h, 9, 4.2);
+    s.addImage({ data: d.dataUrl, x: 0.5 + (9 - f.w) / 2, y: 0.85 + (4.2 - f.h) / 2, w: f.w, h: f.h });
+    s.addText(d.title, { x: 0.5, y: 5.1, w: 9, h: 0.4, fontSize: 12, italic: true, color: '6B7280', align: 'center', fit: 'shrink' });
+  });
+
+  if (sec.source) {
+    const s = pptx.addSlide();
+    s.addText('Дереккөз', { x: 0.6, y: 1.6, w: 8.8, h: 0.8, fontSize: 30, bold: true, color: '312E81', align: 'center' });
+    s.addText(sec.source, { x: 0.6, y: 2.6, w: 8.8, h: 0.8, fontSize: 16, color: '4F46E5', align: 'center', hyperlink: { url: sec.source } });
+  }
+  try {
+    await pptx.writeFile({ fileName: (n === 1 ? 'Дауыс_мәтін_' : 'Іздеу_нәтижесі_') + stamp() + '.pptx' });
+    toast('✔ Презентация сақталды');
+  } catch (e) { toast('⚠️ Сақтау қатесі: ' + e.message, 4500); }
+}
+
+$('word1').addEventListener('click', () => exportWord(1));
+$('ppt1').addEventListener('click', () => exportPptx(1));
+$('word2').addEventListener('click', () => exportWord(2));
+$('ppt2').addEventListener('click', () => exportPptx(2));
+
+/* ============================================================
+   БАСТАПҚЫ ТЕКСЕРУ
+   ============================================================ */
+if (!SR) {
+  $('status1').textContent = '⚠️ Бұл браузер дауыс тануды қолдамайды. Chrome (ПК/Android) немесе Edge қолданыңыз.';
+  $('status2').textContent = $('status1').textContent;
+}
+if (!('speechSynthesis' in window)) $('voiceInfo').textContent = 'Дикторды онлайн таңдаңыз';
+window.addEventListener('beforeunload', () => { try { speechSynthesis.cancel(); } catch (e) {} });
+</script>
+</body>
+</html>

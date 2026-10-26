@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Расписание кружков</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+    --accent:#4f46e5; --accent-d:#4338ca; --ok:#16a34a; --warn:#d97706; --bad:#dc2626;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  header{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;padding:18px 24px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  header .t{flex:1;min-width:260px}
+  header h1{margin:0;font-size:22px}
+  header p{margin:4px 0 0;opacity:.85;font-size:14px}
+  header .btn{background:rgba(255,255,255,.18)}
+  header .btn:hover{background:rgba(255,255,255,.3)}
+  nav{display:flex;gap:6px;padding:12px 24px 0;background:var(--bg);flex-wrap:wrap}
+  nav button{border:0;background:#e0e3f0;padding:10px 16px;border-radius:10px 10px 0 0;font-size:14px;cursor:pointer;color:var(--text)}
+  nav button.active{background:var(--card);font-weight:600;color:var(--accent)}
+  main{padding:0 24px 40px}
+  .panel{display:none;background:var(--card);border-radius:0 12px 12px 12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+  .panel.active{display:block}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .toolbar .spacer{flex:1}
+  label.inl{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+  input[type=text],input[type=number],input[type=time],input[type=url],select,textarea{padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:#fff;font-family:inherit}
+  input:focus,select:focus,textarea:focus{outline:2px solid #c7d2fe;border-color:var(--accent)}
+  button.btn{border:0;background:var(--accent);color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;cursor:pointer}
+  button.btn:hover{background:var(--accent-d)}
+  button.btn.sec{background:#eef0fb;color:var(--accent)}
+  button.btn.sec:hover{background:#e0e3f7}
+  button.btn.excel{background:#15803d}
+  button.btn.excel:hover{background:#166534}
+  button.btn.cloud{background:#0d9488}
+  button.btn.cloud:hover{background:#0f766e}
+  button.btn.danger{background:#fee2e2;color:var(--bad)}
+  .counter{font-size:14px;color:var(--muted)}
+  .counter b{color:var(--accent)}
+  .students{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}
+  .student{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;user-select:none}
+  .student:hover{background:#f8f9ff}
+  .student.checked{background:#eef2ff;border-color:#a5b4fc}
+  .student input{width:18px;height:18px;accent-color:var(--accent);cursor:pointer}
+  .student .cls{font-size:12px;background:#e0e7ff;color:var(--accent);padding:2px 7px;border-radius:6px}
+  .student .name{flex:1;font-size:14px}
+  table{border-collapse:collapse;width:100%}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;font-size:14px;vertical-align:top}
+  th{background:#f3f4f9}
+  td input[type=text]{width:100%}
+  td input[type=number]{width:80px}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;background:#e5e7eb}
+  .badge.ok{background:#dcfce7;color:var(--ok)}
+  .badge.warn{background:#fef3c7;color:var(--warn)}
+  .badge.bad{background:#fee2e2;color:var(--bad)}
+  .grid-wrap{overflow-x:auto}
+  .grid th.time{width:120px;white-space:nowrap}
+  .grid td{min-width:170px;height:84px}
+  .chip{display:flex;align-items:center;justify-content:space-between;gap:6px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;padding:3px 8px;margin-bottom:4px;font-size:13px}
+  .chip small{display:block;color:var(--muted);font-size:11px}
+  .chip.conflict{background:#fee2e2;border-color:#fca5a5}
+  .chip button{border:0;background:transparent;cursor:pointer;color:var(--muted);font-size:15px;padding:0 2px}
+  .grid select{width:100%;font-size:12px;color:var(--muted);padding:4px}
+  .hint{font-size:13px;color:var(--muted);margin:0 0 12px}
+  .empty{color:var(--muted);padding:16px;text-align:center}
+  .msg{font-size:13px;margin:8px 0}
+  .msg.ok{color:var(--ok)} .msg.warn{color:var(--warn)} .msg.err{color:var(--bad)}
+  .tag{display:inline-block;background:#e8f0fb;color:#1f3a5f;border-radius:12px;padding:2px 8px;margin:2px;font-size:12px}
+  .toast{position:fixed;bottom:20px;right:20px;background:#111827;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none;max-width:420px;z-index:10}
+  .toast.show{opacity:1}
+  .roster{font-size:12px;color:var(--muted);margin-top:4px}
+  .journal{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:16px;background:#fbfcfe}
+  .journal h3{margin:0 0 8px;font-size:15px;color:var(--accent)}
+  .journal td input{width:52px;text-align:center;padding:5px}
+  .journal th button{border:0;background:transparent;color:var(--bad);cursor:pointer}
+  .box{border:1px dashed #c7d2fe;background:#f8f9ff;border-radius:10px;padding:14px;margin-bottom:16px}
+  pre{background:#111827;color:#e5e7eb;padding:12px;border-radius:8px;font-size:12px;overflow:auto;margin:8px 0}
+  details summary{cursor:pointer;color:var(--accent);font-weight:600}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="t">
+    <h1>📅 Платформа составления расписания кружков</h1>
+    <p>Ученики, кружки, учителя и время берутся из Google Таблицы; готовое расписание уходит в Лист5.</p>
+  </div>
+  <button class="btn" id="reloadAll">⟳ Обновить Лист1–4 из Google Таблицы</button>
+</header>
+
+<nav id="nav">
+  <button class="active" data-tab="students">1. Ученики</button>
+  <button data-tab="subjects">2. Кружки</button>
+  <button data-tab="teachers">3. Учителя</button>
+  <button data-tab="times">4. Время</button>
+  <button data-tab="schedule">5. Расписание</button>
+  <button data-tab="journal">6. Журнал</button>
+  <button data-tab="sheet5">7. Чтение Лист5</button>
+</nav>
+
+<main>
+
+  <!-- УЧЕНИКИ -->
+  <section class="panel active" id="tab-students">
+    <div class="toolbar">
+      <input type="text" id="search" placeholder="Поиск по имени…" style="min-width:220px">
+      <select id="classFilter"><option value="">Все классы</option></select>
+      <button class="btn sec" id="selAll">Выбрать всех</button>
+      <button class="btn sec" id="selNone">Снять выбор</button>
+      <span class="spacer"></span>
+      <span class="counter">Выбрано: <b id="selCount">0</b> из <b id="totalCount">0</b></span>
+      <button class="btn excel" id="saveStudents">💾 Сохранить в Excel</button>
+    </div>
+    <div class="toolbar">
+      <input type="text" id="newStudent" placeholder="Фамилия Имя Отчество" style="flex:1;min-width:240px">
+      <input type="text" id="newStudentCls" placeholder="Класс" style="width:90px" value="5А">
+      <button class="btn" id="addStudent">+ Добавить ученика</button>
+      <button class="btn danger" id="clearStudents">Очистить список</button>
+    </div>
+    <p class="hint">Поставьте галочку напротив каждого ученика. В Excel сохраняются только отмеченные ученики (если никто не отмечен — весь список).</p>
+    <div class="students" id="studentList"></div>
+  </section>
+
+  <!-- КРУЖКИ -->
+  <section class="panel" id="tab-subjects">
+    <div class="toolbar">
+      <input type="text" id="newName" placeholder="Название кружка" style="min-width:240px">
+      <input type="number" id="newCount" min="1" max="20" value="2" style="width:90px" title="Уроков в неделю">
+      <button class="btn" id="addSubject">+ Добавить кружок</button>
+      <button class="btn danger" id="clearSubjects">Очистить все</button>
+      <span class="spacer"></span>
+      <button class="btn excel" id="saveSubjects">💾 Сохранить в Excel</button>
+    </div>
+    <p class="hint">Название кружка, количество уроков в неделю и учитель. «Записать выбранных» добавляет в кружок учеников, отмеченных на вкладке «Ученики».</p>
+    <table>
+      <thead><tr><th style="width:40px">№</th><th>Название кружка</th><th style="width:110px">Уроков в неделю</th><th style="width:200px">Учитель</th><th>Ученики</th><th style="width:200px">Действия</th></tr></thead>
+      <tbody id="subjectBody"></tbody>
+    </table>
+  </section>
+
+  <!-- УЧИТЕЛЯ -->
+  <section class="panel" id="tab-teachers">
+    <div class="toolbar">
+      <input type="text" id="newTeacher" placeholder="Фамилия И.О." style="min-width:240px">
+      <button class="btn" id="addTeacher">+ Добавить учителя</button>
+      <button class="btn danger" id="clearTeachers">Очистить всех</button>
+      <span class="spacer"></span>
+      <button class="btn excel" id="saveTeachers">💾 Сохранить в Excel</button>
+    </div>
+    <table>
+      <thead><tr><th style="width:40px">№</th><th>Учитель</th><th style="width:100px"></th></tr></thead>
+      <tbody id="teacherBody"></tbody>
+    </table>
+  </section>
+
+  <!-- ВРЕМЯ -->
+  <section class="panel" id="tab-times">
+    <div class="box">
+      <div class="toolbar" style="margin-bottom:0">
+        <label class="inl">Начало <input type="time" id="genStart" value="15:00"></label>
+        <label class="inl">Уроков <input type="number" id="genCount" min="1" max="12" value="3" style="width:70px"></label>
+        <label class="inl">Длительность, мин <input type="number" id="genLen" min="20" max="120" value="45" style="width:80px"></label>
+        <label class="inl">Перемена, мин <input type="number" id="genBreak" min="0" max="60" value="10" style="width:80px"></label>
+        <button class="btn" id="genTimes">Сформировать время</button>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button class="btn sec" id="addTime">+ Добавить урок</button>
+      <span class="spacer"></span>
+      <button class="btn excel" id="saveTimes">💾 Сохранить в Excel</button>
+    </div>
+    <table style="max-width:520px">
+      <thead><tr><th style="width:60px">Урок</th><th>Начало</th><th>Конец</th><th style="width:60px"></th></tr></thead>
+      <tbody id="timeBody"></tbody>
+    </table>
+  </section>
+
+  <!-- РАСПИСАНИЕ -->
+  <section class="panel" id="tab-schedule">
+    <div class="toolbar">
+      <button class="btn" id="autoBuild">⚙ Составить автоматически</button>
+      <button class="btn danger" id="clearSched">Очистить</button>
+      <span class="spacer"></span>
+      <button class="btn cloud" id="saveSheet5">☁ Сохранить в Лист5</button>
+      <button class="btn excel" id="saveAll">💾 Сохранить всё в Excel</button>
+    </div>
+    <div class="msg" id="schedMsg"></div>
+    <p class="hint">Можно составить расписание автоматически (учитывается учитель кружка, ученики и нагрузка по дням) или расставить кружки вручную в ячейках. Красным подсвечиваются совпадения учителя или учеников в одно и то же время.</p>
+    <div style="margin-bottom:12px" id="schedSummary"></div>
+    <div class="grid-wrap"><table class="grid" id="grid"></table></div>
+  </section>
+
+  <!-- ЖУРНАЛ -->
+  <section class="panel" id="tab-journal">
+    <div class="toolbar">
+      <button class="btn excel" id="exportJournals">💾 Сохранить журналы в Excel</button>
+      <button class="btn sec" id="importJournalsBtn">Загрузить журнал из Excel</button>
+      <input id="journalFile" type="file" accept=".xlsx,.xls,.csv" style="display:none">
+    </div>
+    <p class="hint">Журнал создаётся по каждому кружку. Если в кружок записаны ученики, показываются они, иначе весь список. Отметки сохраняются в браузере; в Excel — лист на каждый кружок.</p>
+    <div class="msg" id="journalMsg"></div>
+    <div id="journalsWrap"></div>
+  </section>
+
+  <!-- ЛИСТ5 -->
+  <section class="panel" id="tab-sheet5">
+    <div class="toolbar">
+      <button class="btn" id="reload5">⟳ Прочитать Лист5</button>
+      <a class="btn sec" id="open5" target="_blank" rel="noopener" style="text-decoration:none">Открыть Лист5 в Google ↗</a>
+      <span class="spacer"></span>
+      <button class="btn excel" id="save5xlsx">💾 Сохранить в Excel</button>
+    </div>
+    <div class="msg" id="sheet5Msg"></div>
+    <div class="grid-wrap"><table id="sheet5Table"></table></div>
+
+    <details class="box" style="margin-top:18px">
+      <summary>Настройка записи в Лист5 (один раз)</summary>
+      <p class="hint" style="margin-top:10px">Страница не может сама писать в Google Таблицу без разрешения. Чтобы кнопка «Сохранить в Лист5» писала напрямую:</p>
+      <ol class="hint">
+        <li>Откройте таблицу → Расширения → Apps Script и вставьте код ниже.</li>
+        <li>Развернуть → Новое развёртывание → тип «Веб-приложение», доступ «Все». Скопируйте URL (оканчивается на /exec).</li>
+        <li>Вставьте URL в поле ниже и нажмите «Запомнить».</li>
+      </ol>
+      <pre id="gsCode">const SHEET_NAME = 'Лист5';
+function doPost(e) {
+  const rows = JSON.parse(e.postData.contents).rows;
+  const sh = SpreadsheetApp.getActive().getSheetByName(SHEET_NAME);
+  sh.clearContents();
+  if (rows.length) sh.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
+  return ContentService.createTextOutput('ok');
+}
+function doGet() {
+  const sh = SpreadsheetApp.getActive().getSheetByName(SHEET_NAME);
+  return ContentService.createTextOutput(JSON.stringify(sh.getDataRange().getValues()))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+      <div class="toolbar">
+        <button class="btn sec" id="copyGs">Скопировать код</button>
+        <input type="url" id="scriptUrl" placeholder="https://script.google.com/macros/s/…/exec" style="flex:1;min-width:260px">
+        <button class="btn" id="saveScriptUrl">Запомнить</button>
+      </div>
+      <p class="hint">Без этой настройки кнопка «Сохранить в Лист5» копирует расписание в буфер обмена — достаточно вставить его (Ctrl+V) в ячейку A1 на Лист5. Чтение Лист5 работает, если таблица открыта по ссылке для просмотра.</p>
+    </details>
+  </section>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- КОНСТАНТЫ ---------- */
+const SHEET_ID = "1MNUZIy55jFTPYAFAnv6x8fb4S9uTjWyINkaJ-sDK2QU";
+const GIDS = {students:0, subjects:414364619, teachers:1616467726, times:775120067, out:143047370};
+const SHEET_URL = gid => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit?gid=${gid}#gid=${gid}`;
+const DAYS = ["Понедельник","Вторник","Среда","Четверг","Пятница"];
+const STORE_KEY = "kruzhki_platform_v2";
+
+/* ---------- ДАННЫЕ ПО УМОЛЧАНИЮ (из Google Таблицы) ---------- */
+const DEF_STUDENTS = [
+ "Аблайхан Ернияз Берікұлы","Айдарбек Арлан Дәулетұлы","Алгабаева Лаяна Асхатовна","Ахметова Азина Болатовна",
+ "Әнуарбек Райана Ернұрқызы","Бейбутов Жанали Айдарович","Есимханова Айлин Айболатовна","Жаслун Аспандияр Бейбітұлы",
+ "Зейнулла Заңғар Ержанұлы","Капсалыков Амирали Талгатович","Карибаева Амира Азаматқызы","Қаирбек Алинұр Дауренұлы",
+ "Қалиасқар Кәрім Қуанышұлы","Қамидолла Ибрахим Мирасұлы","Құрмет Абдулла Айбекұлы","Мусалин Тамерлан Ерболатулы",
+ "Оспан Ернұр Еркенұлы","Салауатұлы Бекасыл","Самат Ернар Дәуренұлы","Совет Бексұлтан Бауыржанұлы",
+ "Теміржан Малика Маратқызы","Шайман Мерғалым Меиржанұлы","Шакаманов Бексултан Даулетович","Шахаева Адина Нуржановна"
+];
+const DEF_SUBJECTS = ["Робототехника","Программалау","Кодтау сағаты"];
+const DEF_TEACHERS = ["Шайхимов А.А.","Момынов Қ.М","Базарбай Т.Т"];
+const DEF_TIMES = [["15:00","15:45"],["15:55","16:40"],["16:50","17:35"]];
+
+let state = null;
+function defaultState(){
+  return {
+    students: DEF_STUDENTS.map((n,i)=>({id:i+1, cls:"5А", name:n, checked:false})),
+    nextStudentId: DEF_STUDENTS.length+1,
+    subjects: DEF_SUBJECTS.map((n,i)=>({id:i+1, name:n, perWeek:2, teacher:DEF_TEACHERS[i%DEF_TEACHERS.length], students:[]})),
+    nextSubjectId: DEF_SUBJECTS.length+1,
+    teachers: DEF_TEACHERS.slice(),
+    times: DEF_TIMES.map((t,i)=>({num:i+1, start:t[0], end:t[1]})),
+    schedule: {},   // "день-урок": [subjectId,...]
+    journals: {},   // subjectId: {dates:[], marks:{студент:[...]}}
+    scriptUrl: ""
+  };
+}
+function load(){
+  state = defaultState();
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw){ const s = JSON.parse(raw); if(s && s.students) state = Object.assign(state, s); }
+  }catch(e){}
+}
+function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
+
+/* ---------- УТИЛИТЫ ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(msg){
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove("show"), 3200);
+}
+function setMsg(id, text, cls){ const el=$(id); el.textContent=text; el.className="msg "+(cls||""); }
+function stamp(){ return new Date().toISOString().slice(0,10); }
+function subj(id){ return state.subjects.find(s=>s.id===id); }
+function studentNames(ids){ return ids.map(id=>{const s=state.students.find(x=>x.id===id);return s?s.name:"";}).filter(Boolean); }
+
+function downloadWorkbook(sheets, filename){
+  if(typeof XLSX !== "undefined"){
+    const wb = XLSX.utils.book_new();
+    const used = [];
+    sheets.forEach(sh=>{
+      const ws = XLSX.utils.aoa_to_sheet(sh.rows);
+      if(sh.widths) ws["!cols"] = sh.widths.map(w=>({wch:w}));
+      let nm = (sh.name.replace(/[\\\/\?\*\[\]:]/g,"_").slice(0,31)) || "Лист";
+      let base = nm, n = 2;
+      while(used.includes(nm)) nm = (base.slice(0,28)+"_"+(n++));
+      used.push(nm);
+      XLSX.utils.book_append_sheet(wb, ws, nm);
+    });
+    XLSX.writeFile(wb, filename + ".xlsx");
+    toast("Файл Excel сохранён");
+  } else {
+    const csv = sheets.map(sh => (sheets.length>1 ? sh.name+"\n" : "") +
+      sh.rows.map(r => r.map(c => '"'+String(c).replace(/"/g,'""')+'"').join(";")).join("\n")).join("\n\n");
+    const blob = new Blob(["\uFEFF"+csv], {type:"text/csv;charset=utf-8"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = filename + ".csv"; a.click();
+    URL.revokeObjectURL(a.href);
+    toast("Excel-библиотека не загрузилась (нет интернета) — сохранён CSV");
+  }
+}
+
+/* ---------- ЧТЕНИЕ GOOGLE ТАБЛИЦЫ (JSONP, нужна публичная ссылка) ---------- */
+function gvizFetch(gid){
+  return new Promise((resolve, reject)=>{
+    const cb = "gv_" + Math.random().toString(36).slice(2);
+    const s = document.createElement("script");
+    let done = false;
+    const cleanup = ()=>{ done = true; delete window[cb]; s.remove(); clearTimeout(timer); };
+    const timer = setTimeout(()=>{ if(!done){ cleanup(); reject(new Error("Таймаут: таблица не ответила")); } }, 12000);
+    window[cb] = d => {
+      cleanup();
+      if(!d || d.status==="error" || !d.table){ reject(new Error("Google вернул ошибку")); return; }
+      const rows = d.table.rows.map(r => (r.c||[]).map(c => c ? (c.f!=null ? c.f : (c.v!=null ? c.v : "")) : ""));
+      resolve(rows);
+    };
+    s.onerror = ()=>{ if(!done){ cleanup(); reject(new Error("Нет доступа к таблице (откройте доступ «по ссылке» или проверьте интернет)")); } };
+    s.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?gid=${gid}&headers=0&tqx=out:json;responseHandler:${cb}`;
+    document.head.appendChild(s);
+  });
+}
+const timeOf = v => { const m = String(v).match(/(\d{1,2}):(\d{2})/); return m ? m[1].padStart(2,"0")+":"+m[2] : ""; };
+
+async function reloadFromSheets(){
+  const btn = $("reloadAll"); btn.disabled = true; btn.textContent = "Загрузка…";
+  const errs = [];
+  try{
+    try{
+      const rows = await gvizFetch(GIDS.students);
+      const old = new Map(state.students.map(s=>[s.name,s]));
+      const list = rows.filter(r=>r[1] && String(r[0]).trim()!=="Сынып" && !/аты-жөні/i.test(r[1]))
+                       .map((r,i)=>({id:i+1, cls:String(r[0]||"").trim(), name:String(r[1]).trim(),
+                                     checked: old.get(String(r[1]).trim()) ? old.get(String(r[1]).trim()).checked : false}));
+      if(list.length){ state.students = list; state.nextStudentId = list.length+1;
+        state.subjects.forEach(s=>s.students=[]); }
+    }catch(e){ errs.push("Лист1: "+e.message); }
+    try{
+      const rows = await gvizFetch(GIDS.teachers);
+      const list = rows.map(r=>String(r[0]||"").trim()).filter(x=>x && !/мұғалім|учител/i.test(x));
+      if(list.length) state.teachers = list;
+    }catch(e){ errs.push("Лист3: "+e.message); }
+    try{
+      const rows = await gvizFetch(GIDS.subjects);
+      const names = rows.map(r=>String(r[0]||"").trim()).filter(x=>x && !/назван/i.test(x));
+      if(names.length){
+        const old = new Map(state.subjects.map(s=>[s.name,s]));
+        let nid = 1;
+        state.subjects = names.map((n,i)=>{
+          const o = old.get(n);
+          return {id:nid++, name:n, perWeek:o?o.perWeek:2, teacher:o&&o.teacher?o.teacher:state.teachers[i%Math.max(1,state.teachers.length)]||"", students:o?o.students:[]};
+        });
+        state.nextSubjectId = nid; state.schedule = {}; state.journals = {};
+      }
+    }catch(e){ errs.push("Лист2: "+e.message); }
+    try{
+      const rows = await gvizFetch(GIDS.times);
+      const list = rows.filter(r=>timeOf(r[1]) && timeOf(r[2])).map((r,i)=>({num:i+1, start:timeOf(r[1]), end:timeOf(r[2])}));
+      if(list.length) state.times = list;
+    }catch(e){ errs.push("Лист4: "+e.message); }
+    state.subjects.forEach((s,i)=>{ if(!s.teacher && state.teachers.length) s.teacher = state.teachers[i%state.teachers.length]; });
+    save(); renderAll();
+    toast(errs.length ? "Часть данных не загрузилась: "+errs.join("; ") : "Лист1–4 обновлены из Google Таблицы");
+  } finally { btn.disabled=false; btn.textContent="⟳ Обновить Лист1–4 из Google Таблицы"; }
+}
+$("reloadAll").onclick = reloadFromSheets;
+
+/* ---------- ВКЛАДКИ ---------- */
+function showTab(tab){
+  document.querySelectorAll("#nav button").forEach(x=>x.classList.toggle("active", x.dataset.tab===tab));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active", p.id==="tab-"+tab));
+  if(tab==="subjects") renderSubjects();
+  if(tab==="teachers") renderTeachers();
+  if(tab==="times") renderTimes();
+  if(tab==="schedule") renderSchedule();
+  if(tab==="journal") renderJournals();
+  if(tab==="sheet5" && !render5.loaded) loadSheet5();
+}
+document.querySelectorAll("#nav button").forEach(b=> b.onclick = ()=>showTab(b.dataset.tab));
+
+/* ---------- 1. УЧЕНИКИ ---------- */
+function renderClassFilter(){
+  const classes = [...new Set(state.students.map(s=>s.cls).filter(Boolean))].sort();
+  const cur = $("classFilter").value;
+  $("classFilter").innerHTML = '<option value="">Все классы</option>' +
+    classes.map(c=>`<option ${c===cur?"selected":""}>${esc(c)}</option>`).join("");
+}
+function renderStudents(){
+  const q = $("search").value.trim().toLowerCase(), cls = $("classFilter").value;
+  const list = state.students.filter(s => (!cls || s.cls===cls) && (!q || s.name.toLowerCase().includes(q)));
+  $("studentList").innerHTML = list.length ? list.map(s=>`
+    <label class="student ${s.checked?"checked":""}">
+      <input type="checkbox" data-id="${s.id}" ${s.checked?"checked":""}>
+      <span class="name">${esc(s.name)}</span>
+      <span class="cls">${esc(s.cls)}</span>
+    </label>`).join("") : '<div class="empty">Ничего не найдено</div>';
+  $("selCount").textContent = state.students.filter(s=>s.checked).length;
+  $("totalCount").textContent = state.students.length;
+}
+$("studentList").addEventListener("change", e=>{
+  if(e.target.matches("input[type=checkbox]")){
+    state.students.find(x=>x.id==e.target.dataset.id).checked = e.target.checked; save(); renderStudents();
+  }
+});
+$("search").oninput = renderStudents;
+$("classFilter").onchange = renderStudents;
+function setVisible(val){
+  const q = $("search").value.trim().toLowerCase(), cls = $("classFilter").value;
+  state.students.forEach(s=>{ if((!cls || s.cls===cls) && (!q || s.name.toLowerCase().includes(q))) s.checked = val; });
+  save(); renderStudents();
+}
+$("selAll").onclick = ()=>setVisible(true);
+$("selNone").onclick = ()=>setVisible(false);
+$("addStudent").onclick = ()=>{
+  const name = $("newStudent").value.trim(), cls = $("newStudentCls").value.trim();
+  if(!name) return;
+  if(state.students.some(s=>s.name.toLowerCase()===name.toLowerCase())){ toast("Такой ученик уже есть"); return; }
+  state.students.push({id:state.nextStudentId++, cls, name, checked:false});
+  $("newStudent").value=""; save(); renderClassFilter(); renderStudents();
+};
+$("newStudent").addEventListener("keydown", e=>{ if(e.key==="Enter") $("addStudent").click(); });
+$("clearStudents").onclick = ()=>{
+  if(!confirm("Очистить весь список учеников?")) return;
+  state.students = []; state.subjects.forEach(s=>s.students=[]); save(); renderAll();
+};
+$("saveStudents").onclick = ()=>{
+  let list = state.students.filter(s=>s.checked);
+  if(!list.length) list = state.students;
+  const rows = [["№","Сынып","Аты-жөні"]].concat(list.map((s,i)=>[i+1,s.cls,s.name]));
+  downloadWorkbook([{name:"Ученики", rows, widths:[5,10,40]}], "ucheniki_"+stamp());
+};
+
+/* ---------- 2. КРУЖКИ ---------- */
+function teacherOptions(sel){
+  return '<option value="">— не выбран —</option>' + state.teachers.map(t=>`<option ${t===sel?"selected":""}>${esc(t)}</option>`).join("");
+}
+function renderSubjects(){
+  const body = $("subjectBody");
+  if(!state.subjects.length){ body.innerHTML = '<tr><td colspan="6" class="empty">Кружков пока нет. Добавьте первый выше.</td></tr>'; return; }
+  body.innerHTML = state.subjects.map((sb,i)=>`
+    <tr data-id="${sb.id}">
+      <td>${i+1}</td>
+      <td><input type="text" class="f-name" value="${esc(sb.name)}"></td>
+      <td><input type="number" class="f-count" min="1" max="30" value="${sb.perWeek}"></td>
+      <td><select class="f-teacher">${teacherOptions(sb.teacher)}</select></td>
+      <td><span class="badge">${sb.students.length} уч.</span><div class="roster">${esc(studentNames(sb.students).join(", "))}</div></td>
+      <td><button class="btn sec b-enroll">Записать выбранных</button> <button class="btn danger b-del">Удалить</button></td>
+    </tr>`).join("");
+}
+$("addSubject").onclick = ()=>{
+  const name = $("newName").value.trim(), cnt = parseInt($("newCount").value,10);
+  if(!name){ toast("Введите название кружка"); return; }
+  if(!(cnt>0)){ toast("Укажите количество уроков в неделю"); return; }
+  if(state.subjects.some(s=>s.name.toLowerCase()===name.toLowerCase())){ toast("Такой кружок уже есть"); return; }
+  state.subjects.push({id:state.nextSubjectId++, name, perWeek:cnt, teacher:state.teachers[state.subjects.length%Math.max(1,state.teachers.length)]||"", students:[]});
+  $("newName").value=""; save(); renderSubjects(); toast("Кружок добавлен");
+};
+$("newName").addEventListener("keydown", e=>{ if(e.key==="Enter") $("addSubject").click(); });
+$("clearSubjects").onclick = ()=>{
+  if(!confirm("Удалить все кружки и расписание?")) return;
+  state.subjects=[]; state.schedule={}; state.journals={}; save(); renderAll();
+};
+$("subjectBody").addEventListener("input", e=>{
+  const tr = e.target.closest("tr[data-id]"); if(!tr) return;
+  const sb = subj(+tr.dataset.id);
+  if(e.target.classList.contains("f-name")) sb.name = e.target.value;
+  if(e.target.classList.contains("f-count")) sb.perWeek = Math.max(1, parseInt(e.target.value,10)||1);
+  if(e.target.classList.contains("f-teacher")) sb.teacher = e.target.value;
+  save();
+});
+$("subjectBody").addEventListener("click", e=>{
+  const tr = e.target.closest("tr[data-id]"); if(!tr) return;
+  const sb = subj(+tr.dataset.id);
+  if(e.target.classList.contains("b-del")){
+    if(!confirm("Удалить кружок «"+sb.name+"»?")) return;
+    state.subjects = state.subjects.filter(x=>x!==sb);
+    Object.keys(state.schedule).forEach(k=>{
+      state.schedule[k] = state.schedule[k].filter(id=>id!==sb.id);
+      if(!state.schedule[k].length) delete state.schedule[k];
+    });
+    delete state.journals[sb.id];
+    save(); renderSubjects();
+  }
+  if(e.target.classList.contains("b-enroll")){
+    const ids = state.students.filter(s=>s.checked).map(s=>s.id);
+    if(!ids.length){ toast("Сначала отметьте учеников на вкладке «Ученики»"); return; }
+    sb.students = ids; save(); renderSubjects(); toast("Записано учеников: "+ids.length);
+  }
+});
+$("saveSubjects").onclick = ()=>{
+  if(!state.subjects.length){ toast("Список кружков пуст"); return; }
+  const rows = [["№","Кружок","Уроков в неделю","Учитель","Учеников","Ученики"]].concat(
+    state.subjects.map((s,i)=>[i+1, s.name, s.perWeek, s.teacher||"", s.students.length, studentNames(s.students).join(", ")]));
+  downloadWorkbook([{name:"Кружки", rows, widths:[5,30,16,22,10,80]}], "kruzhki_"+stamp());
+};
+
+/* ---------- 3. УЧИТЕЛЯ ---------- */
+function renderTeachers(){
+  $("teacherBody").innerHTML = state.teachers.length ? state.teachers.map((t,i)=>`
+    <tr data-i="${i}"><td>${i+1}</td><td>${esc(t)}</td><td><button class="btn danger b-delt">Удалить</button></td></tr>`).join("")
+    : '<tr><td colspan="3" class="empty">Учителей нет</td></tr>';
+}
+$("addTeacher").onclick = ()=>{
+  const name = $("newTeacher").value.trim(); if(!name) return;
+  if(state.teachers.some(t=>t.toLowerCase()===name.toLowerCase())){ toast("Такой учитель уже есть"); return; }
+  state.teachers.push(name); $("newTeacher").value=""; save(); renderTeachers();
+};
+$("newTeacher").addEventListener("keydown", e=>{ if(e.key==="Enter") $("addTeacher").click(); });
+$("clearTeachers").onclick = ()=>{
+  if(!confirm("Очистить список учителей?")) return;
+  state.teachers=[]; state.subjects.forEach(s=>s.teacher=""); save(); renderAll();
+};
+$("teacherBody").addEventListener("click", e=>{
+  if(e.target.classList.contains("b-delt")){
+    const i = +e.target.closest("tr").dataset.i, name = state.teachers[i];
+    state.teachers.splice(i,1); state.subjects.forEach(s=>{ if(s.teacher===name) s.teacher=""; });
+    save(); renderTeachers();
+  }
+});
+$("saveTeachers").onclick = ()=>{
+  const rows = [["№","Мұғалім аты жөні"]].concat(state.teachers.map((t,i)=>[i+1,t]));
+  downloadWorkbook([{name:"Учителя", rows, widths:[5,30]}], "uchitelya_"+stamp());
+};
+
+/* ---------- 4. ВРЕМЯ ---------- */
+const toMin = t => { const [h,m]=t.split(":").map(Number); return h*60+m; };
+const fmt = m => String(Math.floor(m/60)%24).padStart(2,"0")+":"+String(m%60).padStart(2,"0");
+function renumberTimes(){ state.times.forEach((t,i)=>t.num=i+1); }
+function pruneSchedule(){
+  Object.keys(state.schedule).forEach(k=>{ if(+k.split("-")[1] >= state.times.length) delete state.schedule[k]; });
+}
+function renderTimes(){
+  $("timeBody").innerHTML = state.times.length ? state.times.map((t,i)=>`
+    <tr data-i="${i}"><td>${t.num}</td>
+      <td><input type="time" class="t-start" value="${t.start}"></td>
+      <td><input type="time" class="t-end" value="${t.end}"></td>
+      <td><button class="btn danger b-delti">✕</button></td></tr>`).join("")
+    : '<tr><td colspan="4" class="empty">Время не задано</td></tr>';
+}
+$("timeBody").addEventListener("input", e=>{
+  const tr = e.target.closest("tr[data-i]"); if(!tr) return;
+  const t = state.times[+tr.dataset.i];
+  if(e.target.classList.contains("t-start")) t.start = e.target.value;
+  if(e.target.classList.contains("t-end")) t.end = e.target.value;
+  save();
+});
+$("timeBody").addEventListener("click", e=>{
+  if(e.target.classList.contains("b-delti")){
+    state.times.splice(+e.target.closest("tr").dataset.i,1); renumberTimes(); pruneSchedule(); save(); renderTimes();
+  }
+});
+$("addTime").onclick = ()=>{
+  const last = state.times[state.times.length-1];
+  const s = last ? toMin(last.end)+10 : 15*60;
+  state.times.push({num:state.times.length+1, start:fmt(s), end:fmt(s+45)}); save(); renderTimes();
+};
+$("genTimes").onclick = ()=>{
+  const start = $("genStart").value || "15:00", n = parseInt($("genCount").value,10)||1,
+        len = parseInt($("genLen").value,10)||45, brk = parseInt($("genBreak").value,10)||0;
+  let cur = toMin(start); const list = [];
+  for(let i=0;i<n;i++){ list.push({num:i+1, start:fmt(cur), end:fmt(cur+len)}); cur += len+brk; }
+  state.times = list; pruneSchedule(); save(); renderTimes(); toast("Время уроков сформировано");
+};
+$("saveTimes").onclick = ()=>{
+  const rows = [["Урок","Начало","Конец"]].concat(state.times.map(t=>[t.num,t.start,t.end]));
+  downloadWorkbook([{name:"Время уроков", rows, widths:[8,10,10]}], "vremya_"+stamp());
+};
+
+/* ---------- 5. РАСПИСАНИЕ ---------- */
+function placedCount(id){ let n=0; Object.values(state.schedule).forEach(a=>a.forEach(x=>{ if(x===id) n++; })); return n; }
+function conflictIds(ids){
+  const bad = new Set();
+  for(let i=0;i<ids.length;i++) for(let j=i+1;j<ids.length;j++){
+    const a = subj(ids[i]), b = subj(ids[j]); if(!a||!b) continue;
+    const sameTeacher = a.teacher && a.teacher===b.teacher;
+    const sharedStudents = a.students.some(id=>b.students.includes(id));
+    if(sameTeacher || sharedStudents){ bad.add(a.id); bad.add(b.id); }
+  }
+  return bad;
+}
+function renderSchedule(){
+  if(!state.subjects.length || !state.times.length){
+    $("grid").innerHTML = '<tr><td class="empty">Добавьте кружки (вкладка 2) и время уроков (вкладка 4).</td></tr>';
+    $("schedSummary").innerHTML = ""; return;
+  }
+  let html = "<thead><tr><th class='time'>Урок</th>" + DAYS.map(d=>`<th>${d}</th>`).join("") + "</tr></thead><tbody>";
+  state.times.forEach((t,si)=>{
+    html += `<tr><th class="time">${t.num} урок<br><small>${t.start}–${t.end}</small></th>`;
+    DAYS.forEach((d,di)=>{
+      const key = di+"-"+si, ids = (state.schedule[key]||[]).filter(subj);
+      const bad = conflictIds(ids);
+      const chips = ids.map(id=>{
+        const sb = subj(id);
+        return `<div class="chip ${bad.has(id)?"conflict":""}"><span>${esc(sb.name)}<small>${esc(sb.teacher||"без учителя")}</small></span><button data-key="${key}" data-rm="${id}" title="Убрать">✕</button></div>`;
+      }).join("");
+      const opts = state.subjects.filter(s=>!ids.includes(s.id)).map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("");
+      html += `<td>${chips}<select data-key="${key}"><option value="">+ добавить</option>${opts}</select></td>`;
+    });
+    html += "</tr>";
+  });
+  $("grid").innerHTML = html + "</tbody>";
+  $("schedSummary").innerHTML = state.subjects.map(s=>{
+    const n = placedCount(s.id), cls = n===s.perWeek ? "ok" : (n>s.perWeek ? "bad" : "warn");
+    return `<span class="badge ${cls}" style="margin-right:6px">${esc(s.name)}: ${n}/${s.perWeek}</span>`;
+  }).join("");
+}
+$("grid").addEventListener("change", e=>{
+  if(e.target.tagName==="SELECT" && e.target.value){
+    const key = e.target.dataset.key;
+    (state.schedule[key] = state.schedule[key] || []).push(parseInt(e.target.value,10));
+    save(); renderSchedule();
+  }
+});
+$("grid").addEventListener("click", e=>{
+  const rm = e.target.dataset && e.target.dataset.rm;
+  if(rm){
+    const key = e.target.dataset.key;
+    state.schedule[key] = state.schedule[key].filter(id=>id!=rm);
+    if(!state.schedule[key].length) delete state.schedule[key];
+    save(); renderSchedule();
+  }
+});
+$("clearSched").onclick = ()=>{ if(confirm("Очистить всё расписание?")){ state.schedule={}; save(); renderSchedule(); setMsg("schedMsg",""); } };
+
+/* Автоматическое составление */
+$("autoBuild").onclick = ()=>{
+  if(!state.subjects.length) return setMsg("schedMsg","Нет кружков","err");
+  if(!state.times.length) return setMsg("schedMsg","Сначала задайте время уроков","err");
+  if(state.subjects.some(s=>!s.teacher)) return setMsg("schedMsg","У некоторых кружков не выбран учитель (вкладка «Кружки»)","err");
+
+  const sched = {}, nD = DAYS.length, nS = state.times.length;
+  const dayLoad = Array(nD).fill(0);
+  const hasSubjectOnDay = (id,d)=>{ for(let s=0;s<nS;s++) if((sched[d+"-"+s]||[]).includes(id)) return true; return false; };
+  const canPlace = (sb,key)=>{
+    const cell = sched[key]||[];
+    return cell.every(oid=>{ const o=subj(oid);
+      return o.teacher!==sb.teacher && !o.students.some(x=>sb.students.includes(x)); });
+  };
+  // задачи по кругам, чтобы кружки чередовались
+  const tasks = []; const maxN = Math.max(...state.subjects.map(s=>s.perWeek));
+  for(let r=0;r<maxN;r++) state.subjects.forEach(s=>{ if(r<s.perWeek) tasks.push(s); });
+
+  let left = 0;
+  tasks.forEach(sb=>{
+    let days = [...Array(nD).keys()].sort((a,b)=>dayLoad[a]-dayLoad[b]||a-b);
+    const free = days.filter(d=>!hasSubjectOnDay(sb.id,d));
+    if(free.length) days = free;
+    let placed = false;
+    for(const d of days){
+      for(let s=0;s<nS;s++){
+        const key = d+"-"+s;
+        if(canPlace(sb,key)){ (sched[key]=sched[key]||[]).push(sb.id); dayLoad[d]++; placed=true; break; }
+      }
+      if(placed) break;
+    }
+    if(!placed) left++;
+  });
+  state.schedule = sched; save(); renderSchedule();
+  setMsg("schedMsg", left ? `Не удалось разместить уроков: ${left}. Добавьте уроки или дни, или уменьшите нагрузку.` : "Расписание составлено. Можно править вручную и сохранять в Лист5.", left?"warn":"ok");
+};
+
+/* Строки расписания (для Лист5 и Excel) */
+function scheduleRows(){
+  const rows = [["День","Урок","Начало","Конец","Кружок","Учитель","Ученики"]];
+  DAYS.forEach((d,di)=> state.times.forEach((t,si)=>{
+    (state.schedule[di+"-"+si]||[]).forEach(id=>{
+      const sb = subj(id); if(!sb) return;
+      rows.push([d, t.num, t.start, t.end, sb.name, sb.teacher||"", studentNames(sb.students).join(", ")]);
+    });
+  }));
+  return rows;
+}
+
+/* Сохранить в Лист5 */
+$("saveSheet5").onclick = async ()=>{
+  const rows = scheduleRows();
+  if(rows.length<2) return setMsg("schedMsg","Расписание пустое — сначала составьте его","err");
+  if(state.scriptUrl){
+    try{
+      await fetch(state.scriptUrl, {method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({rows})});
+      setMsg("schedMsg","Расписание отправлено в Лист5. Проверьте вкладку «Чтение Лист5».","ok");
+      toast("Отправлено в Лист5"); render5.loaded = false;
+      return;
+    }catch(e){ setMsg("schedMsg","Не удалось отправить: "+e.message+". Используем копирование.","warn"); }
+  }
+  const tsv = rows.map(r=>r.map(c=>String(c).replace(/[\t\n]/g," ")).join("\t")).join("\n");
+  let ok = false;
+  try{ await navigator.clipboard.writeText(tsv); ok = true; }catch(e){
+    const ta = document.createElement("textarea"); ta.value = tsv; document.body.appendChild(ta); ta.select();
+    try{ ok = document.execCommand("copy"); }catch(_){} ta.remove();
+  }
+  window.open(SHEET_URL(GIDS.out), "_blank");
+  setMsg("schedMsg", ok ? "Расписание скопировано. В открывшейся таблице Лист5 выделите ячейку A1 и нажмите Ctrl+V. (Для прямой записи настройте Apps Script на вкладке «Чтение Лист5».)"
+                       : "Не удалось скопировать автоматически. Сохраните в Excel и вставьте в Лист5 вручную.", ok?"ok":"warn");
+};
+
+$("saveAll").onclick = ()=>{
+  if(!state.subjects.length) return toast("Сначала добавьте кружки");
+  const chosen = state.students.filter(s=>s.checked);
+  const stRows = [["№","Сынып","Аты-жөні"]].concat((chosen.length?chosen:state.students).map((s,i)=>[i+1,s.cls,s.name]));
+  const grid = [["Урок"].concat(DAYS)];
+  state.times.forEach((t,si)=> grid.push([`${t.num} (${t.start}–${t.end})`].concat(DAYS.map((d,di)=>
+    (state.schedule[di+"-"+si]||[]).map(id=>{const s=subj(id);return s?s.name+" ("+(s.teacher||"")+")":"";}).join(" / ")))));
+  downloadWorkbook([
+    {name:"Расписание (сетка)", rows:grid, widths:[18,28,28,28,28,28]},
+    {name:"Лист5", rows:scheduleRows(), widths:[14,6,8,8,24,22,70]},
+    {name:"Кружки", rows:[["№","Кружок","Уроков в неделю","В расписании","Учитель"]].concat(state.subjects.map((s,i)=>[i+1,s.name,s.perWeek,placedCount(s.id),s.teacher||""])), widths:[5,30,16,14,22]},
+    {name:"Учителя", rows:[["Мұғалім аты жөні"]].concat(state.teachers.map(t=>[t])), widths:[30]},
+    {name:"Ученики", rows:stRows, widths:[5,10,40]}
+  ], "raspisanie_kruzhkov_"+stamp());
+};
+
+/* ---------- 6. ЖУРНАЛ ---------- */
+function defaultDates(){
+  const out = []; const d = new Date();
+  for(let i=0;i<4;i++){ out.push(String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")); d.setDate(d.getDate()+7); }
+  return out;
+}
+function journalStudents(sb){
+  return sb.students.length ? studentNames(sb.students) : state.students.map(s=>s.name);
+}
+function renderJournals(){
+  const wrap = $("journalsWrap");
+  if(!state.subjects.length){ wrap.innerHTML = '<div class="empty">Сначала добавьте кружки.</div>'; return; }
+  wrap.innerHTML = state.subjects.map(sb=>{
+    const j = state.journals[sb.id] = state.journals[sb.id] || {dates:defaultDates(), marks:{}};
+    const sts = journalStudents(sb);
+    sts.forEach(st=>{
+      const m = j.marks[st] = j.marks[st] || [];
+      while(m.length<j.dates.length) m.push("");
+      if(m.length>j.dates.length) m.length = j.dates.length;
+    });
+    return `<div class="journal" data-sid="${sb.id}">
+      <h3>${esc(sb.name)} <small style="color:var(--muted);font-weight:400">· ${esc(sb.teacher||"")}</small></h3>
+      <div style="overflow:auto"><table><thead><tr><th>Ученик</th>
+      ${j.dates.map((d,i)=>`<th>${esc(d)} <button data-rmdate="${i}" title="Удалить дату">×</button></th>`).join("")}
+      <th><input type="text" class="newdate" placeholder="дд.мм" style="width:80px"></th></tr></thead><tbody>
+      ${sts.map(st=>`<tr><td>${esc(st)}</td>${j.dates.map((d,i)=>`<td><input type="text" data-st="${esc(st)}" data-i="${i}" value="${esc(j.marks[st][i]||"")}"></td>`).join("")}<td></td></tr>`).join("")}
+      </tbody></table></div></div>`;
+  }).join("");
+  save();
+}
+$("journalsWrap").addEventListener("change", e=>{
+  const box = e.target.closest(".journal"); if(!box) return;
+  const j = state.journals[+box.dataset.sid];
+  if(e.target.dataset.st!==undefined){ j.marks[e.target.dataset.st][+e.target.dataset.i] = e.target.value; save(); }
+});
+$("journalsWrap").addEventListener("keydown", e=>{
+  if(e.key==="Enter" && e.target.classList.contains("newdate")){
+    const v = e.target.value.trim(); if(!v) return;
+    const j = state.journals[+e.target.closest(".journal").dataset.sid];
+    j.dates.push(v); Object.keys(j.marks).forEach(st=>j.marks[st].push("")); save(); renderJournals();
+  }
+});
+$("journalsWrap").addEventListener("click", e=>{
+  if(e.target.dataset.rmdate!==undefined){
+    const j = state.journals[+e.target.closest(".journal").dataset.sid], i = +e.target.dataset.rmdate;
+    j.dates.splice(i,1); Object.keys(j.marks).forEach(st=>j.marks[st].splice(i,1)); save(); renderJournals();
+  }
+});
+$("exportJournals").onclick = ()=>{
+  if(!state.subjects.length) return setMsg("journalMsg","Нет кружков","err");
+  renderJournals();
+  const sheets = state.subjects.map(sb=>{
+    const j = state.journals[sb.id];
+    const rows = [["Ученик"].concat(j.dates)];
+    journalStudents(sb).forEach(st=>rows.push([st].concat(j.dates.map((d,i)=>(j.marks[st]&&j.marks[st][i])||""))));
+    return {name:sb.name, rows, widths:[40].concat(j.dates.map(()=>9))};
+  });
+  downloadWorkbook(sheets, "zhurnaly_"+stamp());
+  setMsg("journalMsg","Журналы сохранены","ok");
+};
+$("importJournalsBtn").onclick = ()=>$("journalFile").click();
+$("journalFile").onchange = ev=>{
+  const file = ev.target.files[0]; if(!file) return;
+  if(typeof XLSX==="undefined") return setMsg("journalMsg","Excel-библиотека не загружена (нет интернета)","err");
+  const reader = new FileReader();
+  reader.onload = e=>{
+    try{
+      const wb = XLSX.read(new Uint8Array(e.target.result), {type:"array"}); let n = 0;
+      wb.SheetNames.forEach(name=>{
+        const aoa = XLSX.utils.sheet_to_json(wb.Sheets[name], {header:1, defval:""});
+        if(!aoa.length) return;
+        let sb = state.subjects.find(s=>s.name===name);
+        if(!sb){ sb = {id:state.nextSubjectId++, name, perWeek:1, teacher:"", students:[]}; state.subjects.push(sb); }
+        const j = {dates:aoa[0].slice(1).map(String), marks:{}};
+        for(let r=1;r<aoa.length;r++){
+          const st = String(aoa[r][0]||"").trim(); if(!st) continue;
+          if(!state.students.some(s=>s.name===st)) state.students.push({id:state.nextStudentId++, cls:"", name:st, checked:false});
+          j.marks[st] = aoa[r].slice(1).map(v=>v==null?"":String(v));
+        }
+        state.journals[sb.id] = j; n++;
+      });
+      save(); renderAll(); setMsg("journalMsg","Загружено журналов: "+n,"ok");
+    }catch(err){ setMsg("journalMsg","Ошибка чтения файла: "+err.message,"err"); }
+  };
+  reader.readAsArrayBuffer(file); ev.target.value = "";
+};
+
+/* ---------- 7. ЧТЕНИЕ ЛИСТ5 ---------- */
+let sheet5Rows = [];
+function render5(){
+  const t = $("sheet5Table");
+  const rows = sheet5Rows.filter(r=>r.some(c=>String(c).trim()!==""));
+  if(!rows.length){ t.innerHTML = '<tr><td class="empty">Лист5 пока пуст. Составьте расписание и нажмите «Сохранить в Лист5».</td></tr>'; return; }
+  const head = rows[0], body = rows.slice(1);
+  t.innerHTML = "<thead><tr>"+head.map(c=>`<th>${esc(c)}</th>`).join("")+"</tr></thead><tbody>"+
+    body.map(r=>"<tr>"+head.map((_,i)=>`<td>${esc(r[i]==null?"":r[i])}</td>`).join("")+"</tr>").join("")+"</tbody>";
+}
+async function loadSheet5(){
+  setMsg("sheet5Msg","Загрузка Лист5…");
+  try{
+    let rows;
+    if(state.scriptUrl){
+      const r = await fetch(state.scriptUrl); rows = await r.json();
+    } else {
+      rows = await gvizFetch(GIDS.out);
+    }
+    sheet5Rows = rows; render5.loaded = true;
+    const n = Math.max(0, sheet5Rows.filter(r=>r.some(c=>String(c).trim()!=="")).length-1);
+    setMsg("sheet5Msg", `Лист5 прочитан, строк расписания: ${n}`, "ok");
+    render5();
+  }catch(e){
+    setMsg("sheet5Msg","Не удалось прочитать Лист5: "+e.message,"err");
+    render5();
+  }
+}
+$("reload5").onclick = loadSheet5;
+$("open5").href = SHEET_URL(GIDS.out);
+$("save5xlsx").onclick = ()=>{
+  const rows = sheet5Rows.filter(r=>r.some(c=>String(c).trim()!==""));
+  if(!rows.length) return toast("Лист5 пуст");
+  downloadWorkbook([{name:"Лист5", rows, widths:[14,6,8,8,24,22,70]}], "list5_"+stamp());
+};
+$("copyGs").onclick = async ()=>{
+  try{ await navigator.clipboard.writeText($("gsCode").textContent); toast("Код скопирован"); }catch(e){ toast("Выделите код и скопируйте вручную"); }
+};
+$("saveScriptUrl").onclick = ()=>{
+  state.scriptUrl = $("scriptUrl").value.trim(); save();
+  toast(state.scriptUrl ? "Адрес запомнен: теперь запись идёт напрямую в Лист5" : "Адрес удалён");
+};
+
+/* ---------- СТАРТ ---------- */
+function renderAll(){
+  renderClassFilter(); renderStudents(); renderSubjects(); renderTeachers(); renderTimes(); renderSchedule(); renderJournals();
+}
+load();
+$("scriptUrl").value = state.scriptUrl || "";
+renderAll();
+</script>
+</body>
+</html>

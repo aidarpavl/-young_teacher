@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Өзара сабаққа қатысу журналы</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;background:#e9ebf1;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1a1a2e}
+#bar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;background:#fff;box-shadow:0 1px 8px rgba(34,36,43,.15)}
+#bar h1{margin:0;font-size:16px;font-weight:700;flex:1;min-width:180px}
+#bar label{font-size:13px;color:#555b6e;display:flex;align-items:center;gap:6px}
+select{border:1px solid #d0d4e2;border-radius:6px;height:34px;padding:0 8px;font-size:14px;font-family:inherit;background:#fff}
+.btn{border:0;background:#f1f2f5;color:#050038;border-radius:6px;height:36px;padding:0 14px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer}
+.btn:hover{background:#e6e8ee}
+.btn.primary{background:#4262ff;color:#fff}.btn.primary:hover{background:#3351e0}
+main{max-width:860px;margin:0 auto;padding:16px 12px 100px}
+#tip{background:#fff8d6;border:1px solid #f0dc7a;border-radius:8px;padding:10px 14px;font-size:14px;line-height:1.45;margin-bottom:14px}
+#nosr{display:none;background:#ffe9e9;border:1px solid #f1a9a9;border-radius:8px;padding:10px 14px;font-size:14px;margin-bottom:14px}
+body.nosr #nosr{display:block}body.nosr .mic{opacity:.4}
+.page{background:#fff;box-shadow:0 2px 14px rgba(34,36,43,.18);border-radius:4px;padding:44px 56px;margin-bottom:22px;font-family:"Times New Roman",Times,serif;font-size:18px;line-height:1.4}
+.page .ctr{text-align:center}.page b{font-weight:700}
+.cover{min-height:760px;display:flex;flex-direction:column}
+.cover .big{font-size:34px;font-weight:700;text-align:center;line-height:1.35;margin:90px 0 40px}
+.cover .yr{font-size:22px;font-weight:700;text-align:center}
+.cover .bottom{margin-top:auto;display:flex;justify-content:flex-end;padding-top:80px}
+.row{display:flex;align-items:flex-end;gap:8px;margin:12px 0;flex-wrap:wrap}
+.row .lb{white-space:nowrap}
+.fld{display:flex;align-items:flex-end;gap:6px;flex:1;min-width:120px;position:relative}
+.fld.w1{flex:0 0 190px}.fld.w2{flex:1 1 200px}.fld.w3{flex:0 0 130px}
+input.bl,textarea.bl{flex:1;min-width:0;border:0;border-bottom:1.5px solid #333;background:transparent;font:inherit;color:#050038;padding:2px 2px;outline:0;border-radius:0}
+input.bl:focus,textarea.bl:focus{background:#f4f6ff;border-bottom-color:#4262ff}
+textarea.ruled{display:block;width:100%;resize:none;overflow:hidden;border:0;font:inherit;color:#050038;line-height:30px;padding:0 2px;outline:0;background:repeating-linear-gradient(transparent,transparent 29px,#333 29px,#333 30px)}
+textarea.ruled:focus{background-color:#f4f6ff}
+.mic{flex:none;width:30px;height:30px;border-radius:50%;border:1px solid #c5cbe6;background:#fff;color:#4262ff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.mic:hover{background:#eef1ff}
+.mic svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.mic.on{background:#e5384f;border-color:#e5384f;color:#fff;animation:pulse 1.2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(229,56,79,.55)}70%{box-shadow:0 0 0 10px rgba(229,56,79,0)}100%{box-shadow:0 0 0 0 rgba(229,56,79,0)}}
+.block{margin:14px 0}
+.block .lb{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.tbwrap{overflow-x:auto;margin:26px -30px 8px}
+table{border-collapse:collapse;width:100%;min-width:640px;table-layout:fixed}
+th,td{border:1px solid #000;padding:0;vertical-align:top}
+th{font-weight:400;padding:8px 4px;text-align:center;font-size:17px}
+.cell{position:relative}
+.cell textarea{display:block;width:100%;min-height:170px;border:0;resize:none;overflow:hidden;font:inherit;font-size:17px;line-height:1.35;padding:8px 38px 8px 8px;background:transparent;color:#050038;outline:0}
+.cell textarea:focus{background:#f4f6ff}
+.cell .mic{position:absolute;top:6px;right:6px}
+.tact{display:flex;gap:8px;margin:6px 0 18px;font-family:Inter,system-ui,sans-serif}
+#live{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);display:none;align-items:center;gap:12px;background:#050038;color:#fff;border-radius:999px;padding:10px 12px 10px 18px;font-size:14px;z-index:30;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+#live.show{display:flex}
+#live i{width:10px;height:10px;border-radius:50%;background:#ff4d63;animation:pulse 1.2s infinite}
+#live button{border:0;border-radius:999px;background:#fff;color:#050038;font-weight:700;padding:6px 14px;cursor:pointer;font-family:inherit}
+@media (max-width:640px){.page{padding:26px 18px;font-size:16px}.cover .big{font-size:26px;margin:50px 0 24px}.tbwrap{margin:22px -8px 8px}.fld.w1,.fld.w3{flex:1 1 120px}}
+@media print{#bar,#tip,#live,.mic,.tact{display:none!important}body{background:#fff}.page{box-shadow:none;margin:0;page-break-after:always}}
+</style>
+</head>
+<body>
+<header id="bar">
+  <h1>📘 Өзара сабаққа қатысу журналы</h1>
+  <label>Дыбыс тілі:
+    <select id="lang"><option value="kk-KZ">Қазақша</option><option value="ru-RU">Русский</option></select>
+  </label>
+  <button class="btn" id="clearBtn">Тазалау</button>
+  <button class="btn primary" id="saveBtn">📄 Word-қа сақтау (.docx)</button>
+</header>
+
+<main>
+  <div id="tip">🎤 Кез келген жолдың немесе кесте ұяшығының жанындағы микрофон батырмасын басып сөйлеңіз — дауыс мәтінге айналады. Қайта басқанда жазу тоқтайды. Жазылған мәтінді кейін <b>пернетақтамен</b> түзетіп немесе толықтыра аласыз. Бәрі автоматты түрде сақталып отырады.</div>
+  <div id="nosr">Бұл браузер дауысты мәтінге айналдыруды қолдамайды. Google Chrome немесе Microsoft Edge қолданыңыз. Пернетақтамен жазу жұмыс істейді.</div>
+
+  <!-- 1-бет: мұқаба -->
+  <section class="page cover">
+    <div class="ctr"><b>Павлодар облысы білім беру басқармасының</b></div>
+    <div class="row" style="justify-content:center;margin-top:8px"><b class="lb">мектеп аты</b>
+      <span class="fld w2" style="flex:0 1 300px"><input class="bl" data-k="school" type="text" autocomplete="off"><button type="button" class="mic" title="Микрофон арқылы жазу" aria-label="Микрофон"></button></span></div>
+    <div class="big">Өзара сабаққа<br>қатысу журналы</div>
+    <div class="yr">2026 – 2027 оқу жылы</div>
+    <div class="bottom"><div class="row" style="margin:0;flex-wrap:nowrap"><b class="lb">БҒӘЖО:</b>
+      <span class="fld" style="flex:0 0 230px"><input class="bl" data-k="bgzho" type="text" autocomplete="off"><button type="button" class="mic" title="Микрофон арқылы жазу" aria-label="Микрофон"></button></span></div></div>
+  </section>
+
+  <!-- 2-бет: қатысу парағы -->
+  <section class="page">
+    <div class="ctr"><b>Өзара сабаққа қатынасу парағы</b></div>
+    <div class="row"><span class="lb">Мерзімі</span>
+      <span class="fld w1"><input class="bl" data-k="date" type="text"><button type="button" class="mic"></button></span>
+      <span class="lb">Пәні</span>
+      <span class="fld w2"><input class="bl" data-k="subject" type="text"><button type="button" class="mic"></button></span>
+      <span class="lb">Сыныбы</span>
+      <span class="fld w3"><input class="bl" data-k="cls" type="text"><button type="button" class="mic"></button></span></div>
+    <div class="row"><span class="lb">Пән мұғалімі</span>
+      <span class="fld"><input class="bl" data-k="teacher" type="text"><button type="button" class="mic"></button></span></div>
+    <div class="row"><span class="lb">Сабақтың тақырыбы</span>
+      <span class="fld"><input class="bl" data-k="topic" type="text"><button type="button" class="mic"></button></span></div>
+    <div class="block"><div class="lb">Сабаққа қатысу мақсатым:</div>
+      <span class="fld" style="align-items:flex-start"><textarea class="ruled" data-k="goal" rows="4"></textarea><button type="button" class="mic"></button></span></div>
+    <div class="row"><span class="lb">Көрнекілігі:</span>
+      <span class="fld"><input class="bl" data-k="visual" type="text"><button type="button" class="mic"></button></span></div>
+
+    <div class="tbwrap"><table id="tbl"></table></div>
+    <div class="tact">
+      <button class="btn" id="addRow">＋ Қатар қосу</button>
+      <button class="btn" id="delRow">− Соңғы қатарды өшіру</button>
+    </div>
+
+    <div class="block"><div class="lb">Өзіме түртіп алдым:</div>
+      <span class="fld" style="align-items:flex-start"><textarea class="ruled" data-k="notes" rows="8"></textarea><button type="button" class="mic"></button></span></div>
+  </section>
+</main>
+
+<div id="live"><i></i><span id="liveTxt">Тыңдап тұр… сөйлеңіз</span><button id="liveStop">Тоқтату</button></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const MIC='<svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3M9 21h6"/></svg>';
+const T={nosr:'Бұл браузер дауысты мәтінге айналдыруды қолдамайды. Chrome немесе Edge қолданыңыз.',denied:'Микрофонға рұқсат берілмеген. Браузер баптауларынан рұқсат беріңіз.',lang:'Бұл тіл браузерде қолдау таппады. Тілді ауыстырып көріңіз.',clear:'Барлық жазылған мәтін өшіріледі. Жалғастырасыз ба?'};
+const KEYS=['school','bgzho','date','subject','cls','teacher','topic','goal','visual','notes'];
+const fresh=()=>({F:Object.fromEntries(KEYS.map(k=>[k,''])),rows:[{t:'span',c:['','','']},{t:'span',c:['','','']},{t:'split',c:['','','','']}],lang:'kk-KZ'});
+let S=fresh();
+try{const d=JSON.parse(localStorage.getItem('journal_v1')||'null');if(d&&d.F&&Array.isArray(d.rows)){S=d;KEYS.forEach(k=>{if(typeof S.F[k]!=='string')S.F[k]=''})}}catch(e){}
+const save=()=>{try{localStorage.setItem('journal_v1',JSON.stringify(S))}catch(e){}};
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SR)document.body.classList.add('nosr');
+
+/* ---------- форма ---------- */
+document.querySelectorAll('.mic').forEach(b=>{b.innerHTML=MIC;b.title='Микрофон арқылы жазу';b.setAttribute('aria-label','Микрофон')});
+const auto=el=>{if(el.tagName==='TEXTAREA'){el.style.height='auto';el.style.height=el.scrollHeight+'px'}};
+function fillFields(){document.querySelectorAll('[data-k]').forEach(el=>{el.value=S.F[el.dataset.k]||'';auto(el)})}
+function renderTable(){
+  const cell=(r,c,span)=>`<td${span?` colspan="${span}"`:''}><div class="cell"><textarea data-r="${r}" data-c="${c}"></textarea><button type="button" class="mic" title="Микрофон арқылы жазу" aria-label="Микрофон">${MIC}</button></div></td>`;
+  let h='<colgroup><col style="width:12%"><col style="width:35%"><col style="width:32%"><col style="width:21%"></colgroup>'+
+    '<tr><th>Сабақ<br>кезеңдері</th><th colspan="2">Іс - әрекеттер</th><th>Әдіс - тәсілдер</th></tr>';
+  S.rows.forEach((row,r)=>{
+    h+='<tr>'+(row.t==='split'?cell(r,0)+cell(r,1)+cell(r,2)+cell(r,3):cell(r,0)+cell(r,1,2)+cell(r,2));
+    h+='</tr>';
+  });
+  $('#tbl').innerHTML=h;
+  document.querySelectorAll('#tbl textarea').forEach(t=>{t.value=S.rows[t.dataset.r].c[t.dataset.c]||'';auto(t)});
+}
+document.addEventListener('input',e=>{
+  const el=e.target;
+  if(live&&live.el===el&&e.isTrusted)stopMic();
+  if(el.dataset&&el.dataset.k){S.F[el.dataset.k]=el.value;auto(el);save()}
+  else if(el.dataset&&el.dataset.r!==undefined){S.rows[el.dataset.r].c[el.dataset.c]=el.value;auto(el);save()}
+});
+$('#addRow').onclick=()=>{S.rows.push({t:'span',c:['','','']});save();renderTable()};
+$('#delRow').onclick=()=>{if(S.rows.length>1){S.rows.pop();save();renderTable()}};
+$('#clearBtn').onclick=()=>{if(!confirm(T.clear))return;stopMic();const l=S.lang;S=fresh();S.lang=l;save();fillFields();renderTable()};
+$('#lang').value=S.lang||'kk-KZ';
+$('#lang').onchange=e=>{S.lang=e.target.value;save();if(live){const el=live.el,b=live.btn;stopMic();setTimeout(()=>startMic(el,b),300)}};
+window.addEventListener('resize',()=>document.querySelectorAll('textarea').forEach(auto));
+
+/* ---------- микрофон ---------- */
+let live=null;
+const sepOf=b=>b&&!/\s$/.test(b)?' ':'';
+function put(L,txt){
+  let s=txt.replace(/^\s+/,'');
+  if(s&&(L.before.trim()===''||/[.!?]\s*$/.test(L.before)))s=s.charAt(0).toUpperCase()+s.slice(1);
+  const mid=s?sepOf(L.before)+s:'';
+  const tail=mid&&L.after&&!/^\s/.test(L.after)?' ':'';
+  L.cur=L.before+mid;
+  L.el.value=L.cur+tail+L.after;
+  try{L.el.setSelectionRange(L.cur.length,L.cur.length)}catch(e){}
+  L.el.dispatchEvent(new Event('input',{bubbles:true}));
+}
+function showLive(on){$('#live').classList.toggle('show',on)}
+function endMic(){if(live){live.btn.classList.remove('on');live=null}showLive(false)}
+function stopMic(){if(!live)return;const L=live;L.want=false;try{L.rec.stop()}catch(e){}endMic()}
+function startMic(el,btn){
+  if(!SR){alert(T.nosr);return}
+  stopMic();
+  const rec=new SR();rec.lang=$('#lang').value;rec.continuous=true;rec.interimResults=true;
+  const v=el.value,pos=typeof el.selectionStart==='number'?el.selectionStart:v.length;
+  const L=live={el,btn,rec,before:v.slice(0,pos),after:v.slice(pos),cur:v.slice(0,pos),want:true};
+  rec.onresult=e=>{
+    let fin='',itr='';
+    for(let i=0;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)fin+=r[0].transcript;else itr+=r[0].transcript}
+    put(L,fin+itr);
+  };
+  rec.onerror=e=>{
+    if(e.error==='not-allowed'||e.error==='service-not-allowed'){L.want=false;alert(T.denied)}
+    else if(e.error==='language-not-supported'){L.want=false;alert(T.lang)}
+  };
+  rec.onend=()=>{
+    if(live!==L)return;
+    if(L.want){L.before=L.cur;setTimeout(()=>{if(live===L){try{L.rec.start()}catch(x){endMic()}}},200)}
+    else endMic();
+  };
+  try{rec.start()}catch(x){live=null;return}
+  btn.classList.add('on');showLive(true);
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.mic');if(!b)return;
+  const wrap=b.closest('.fld,.cell'),el=wrap&&wrap.querySelector('input,textarea');if(!el)return;
+  if(live&&live.btn===b)stopMic();else startMic(el,b);
+});
+$('#liveStop').onclick=stopMic;
+
+/*DOCX_START*/
+const XE=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const RFN='<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman" w:eastAsia="Times New Roman"/>';
+function wRun(t,o={}){
+  const sz=o.sz||24,rp=RFN+(o.b?'<w:b/>':'')+(o.u?'<w:u w:val="single"/>':'')+`<w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/><w:lang w:val="kk-KZ"/>`;
+  return String(t).split('\n').map((l,i)=>`<w:r><w:rPr>${rp}</w:rPr>${i?'<w:br/>':''}<w:t xml:space="preserve">${XE(l)}</w:t></w:r>`).join('');
+}
+function wPara(inner,o={}){
+  const pp=(o.pb?'<w:pageBreakBefore/>':'')+`<w:spacing w:before="${o.before||0}" w:after="${o.after||0}" w:line="240" w:lineRule="auto"/>`+(o.ind?`<w:ind w:left="${o.ind}"/>`:'')+(o.jc?`<w:jc w:val="${o.jc}"/>`:'');
+  return `<w:p><w:pPr>${pp}</w:pPr>${inner}</w:p>`;
+}
+const wVal=(x,n,o={})=>(x||'').trim()?wRun(x.trim(),{...o,u:1}):wRun('_'.repeat(n),o);
+function wCell(w,text,span,jc){
+  const bd=['top','left','bottom','right'].map(s=>`<w:${s} w:val="single" w:sz="4" w:space="0" w:color="000000"/>`).join('');
+  return `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${span?`<w:gridSpan w:val="${span}"/>`:''}<w:tcBorders>${bd}</w:tcBorders></w:tcPr>${wPara(wRun(text||''),{jc})}</w:tc>`;
+}
+function docxTable(S){
+  const hdr=`<w:tr><w:trPr><w:trHeight w:val="800" w:hRule="atLeast"/><w:tblHeader/></w:trPr>${wCell(1277,'Сабақ кезеңдері',0,'center')}${wCell(7087,'Іс - әрекеттер',2,'center')}${wCell(2268,'Әдіс - тәсілдер',0,'center')}</w:tr>`;
+  const rows=S.rows.map((r,i)=>{
+    const h=i===0?2500:i<3?6000:3000,c=r.c;
+    return `<w:tr><w:trPr><w:trHeight w:val="${h}" w:hRule="atLeast"/></w:trPr>`+(r.t==='split'?wCell(1277,c[0])+wCell(3685,c[1])+wCell(3402,c[2])+wCell(2268,c[3]):wCell(1277,c[0])+wCell(7087,c[1],2)+wCell(2268,c[2]))+'</w:tr>';
+  }).join('');
+  return `<w:tbl><w:tblPr><w:tblW w:w="10632" w:type="dxa"/><w:tblInd w:w="-743" w:type="dxa"/><w:tblLayout w:type="fixed"/><w:tblCellMar><w:left w:w="108" w:type="dxa"/><w:right w:w="108" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid><w:gridCol w:w="1277"/><w:gridCol w:w="3685"/><w:gridCol w:w="3402"/><w:gridCol w:w="2268"/></w:tblGrid>${hdr}${rows}</w:tbl>`;
+}
+function docxBody(S){
+  const F=S.F,ind=567,e=()=>wPara('');
+  let b='';
+  b+=wPara(wRun('Павлодар облысы білім беру басқармасының',{b:1}),{jc:'center',after:120});
+  b+=wPara(wRun('мектеп аты ',{b:1})+wVal(F.school,28,{b:1}),{jc:'center'});
+  b+=e()+e()+e()+e()+e();
+  b+=wPara(wRun('Өзара сабаққа',{b:1,sz:40}),{jc:'center',after:120});
+  b+=wPara(wRun('қатысу журналы',{b:1,sz:40}),{jc:'center'});
+  b+=e()+e();
+  b+=wPara(wRun('2026 – 2027 оқу жылы',{b:1,sz:28}),{jc:'center'});
+  b+=wPara(wRun('БҒӘЖО: ',{b:1,sz:20})+wVal(F.bgzho,20,{b:1,sz:20}),{jc:'right',before:9800});
+  b+=wPara(wRun('Өзара сабаққа қатынасу парағы',{b:1}),{jc:'center',after:200,pb:1});
+  b+=wPara(wRun('Мерзімі ')+wVal(F.date,14)+wRun('      Пәні  ')+wVal(F.subject,19)+wRun('   Сыныбы ')+wVal(F.cls,5),{ind,after:160});
+  b+=wPara(wRun('Пән мұғалімі ')+wVal(F.teacher,60),{ind,after:160});
+  b+=wPara(wRun('Сабақтың тақырыбы ')+wVal(F.topic,48),{ind,after:160});
+  b+=wPara(wRun('Сабаққа қатысу мақсатым: ')+wVal(F.goal,270),{ind,after:160});
+  b+=wPara(wRun('Көрнекілігі: ')+wVal(F.visual,62),{ind,after:160});
+  b+=e()+e();
+  b+=docxTable(S);
+  b+=wPara(wRun('Өзіме түртіп алдым: ')+wVal(F.notes,420),{before:60});
+  b+='<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="567" w:right="850" w:bottom="1134" w:left="1701" w:header="0" w:footer="0" w:gutter="0"/></w:sectPr>';
+  return b;
+}
+const CT=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t.push(c>>>0)}return t})();
+function crc32(u){let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=CT[(c^u[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0}
+function zipStore(files){
+  const enc=new TextEncoder(),parts=[],cen=[];let off=0;
+  files.forEach(f=>{
+    const nm=enc.encode(f.name),d=enc.encode(f.data),crc=crc32(d);
+    const lh=new DataView(new ArrayBuffer(30));
+    [[0,0x04034b50,4],[4,20,2],[6,0x0800,2],[8,0,2],[10,0,2],[12,33,2],[14,crc,4],[18,d.length,4],[22,d.length,4],[26,nm.length,2],[28,0,2]].forEach(([p,v,n])=>n===4?lh.setUint32(p,v,true):lh.setUint16(p,v,true));
+    parts.push(new Uint8Array(lh.buffer),nm,d);
+    const ch=new DataView(new ArrayBuffer(46));
+    [[0,0x02014b50,4],[4,20,2],[6,20,2],[8,0x0800,2],[10,0,2],[12,0,2],[14,33,2],[16,crc,4],[20,d.length,4],[24,d.length,4],[28,nm.length,2],[30,0,2],[32,0,2],[34,0,2],[36,0,2],[38,0,4],[42,off,4]].forEach(([p,v,n])=>n===4?ch.setUint32(p,v,true):ch.setUint16(p,v,true));
+    cen.push(new Uint8Array(ch.buffer),nm);
+    off+=30+nm.length+d.length;
+  });
+  const cs=cen.reduce((a,u)=>a+u.length,0),end=new DataView(new ArrayBuffer(22));
+  [[0,0x06054b50,4],[4,0,2],[6,0,2],[8,files.length,2],[10,files.length,2],[12,cs,4],[16,off,4],[20,0,2]].forEach(([p,v,n])=>n===4?end.setUint32(p,v,true):end.setUint16(p,v,true));
+  return new Blob([...parts,...cen,new Uint8Array(end.buffer)],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+}
+function buildDocx(S){
+  const W='xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"',H='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+  return zipStore([
+    {name:'[Content_Types].xml',data:H+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>'},
+    {name:'_rels/.rels',data:H+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>'},
+    {name:'word/_rels/document.xml.rels',data:H+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'},
+    {name:'word/styles.xml',data:H+`<w:styles ${W}><w:docDefaults><w:rPrDefault><w:rPr>${RFN}<w:sz w:val="24"/><w:szCs w:val="24"/><w:lang w:val="kk-KZ"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style></w:styles>`},
+    {name:'word/document.xml',data:H+`<w:document ${W}><w:body>${docxBody(S)}</w:body></w:document>`}
+  ]);
+}
+/*DOCX_END*/
+
+$('#saveBtn').onclick=()=>{
+  stopMic();
+  const blob=buildDocx(S),a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download='Өзара_сабаққа_қатысу_журналы.docx';
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{a.remove();URL.revokeObjectURL(a.href)},1000);
+};
+
+fillFields();renderTable();
+</script>
+</body>
+</html>

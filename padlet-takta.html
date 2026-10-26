@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Padlet тақта</title>
+<style>
+:root{--purple:#8b5cf6;--pink:#e5307f;--text:#1f1f2e;--muted:#8a8a99;--line:#e6e6ee;--bg:#fff}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Roboto,Arial,sans-serif;color:var(--text);background:#fff}
+button{font:inherit;cursor:pointer}
+.hidden{display:none!important}
+/* top nav */
+.nav{display:flex;align-items:center;gap:18px;padding:18px 26px;font-weight:600;font-size:15px}
+.nav .logo{font-size:26px}
+.nav a{color:#555;text-decoration:none;cursor:pointer}
+.nav a.on{color:var(--purple)}
+.nav .sep{color:#ccc}
+.nav .create{color:var(--pink)}
+.nav .sp{flex:1}
+.avatar{width:30px;height:30px;border-radius:50%;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px}
+.gear{width:34px;height:34px;border-radius:50%;background:#eee;border:0}
+/* dashboard */
+.dash{display:flex;padding:0 26px}
+.side{width:230px;flex:none;padding-right:26px}
+.side h3{margin:20px 0 4px;font-size:18px}
+.side .hello{font-size:18px;line-height:1.3;margin-bottom:14px}
+.side .small{font-size:12px;color:var(--muted)}
+.pinkbtn{background:#fde8f1;color:var(--pink);border:0;border-radius:20px;padding:9px 14px;font-weight:700;font-size:13px;margin:10px 0}
+.search{display:flex;align-items:center;gap:8px;background:#f3f3f7;border-radius:10px;padding:10px 12px;margin:12px 0}
+.search input{border:0;background:transparent;outline:none;width:100%;font:inherit}
+.menu{list-style:none;padding:0;margin:14px 0}
+.menu li{display:flex;align-items:center;gap:12px;padding:14px 4px;font-size:17px;cursor:pointer;border-bottom:1px solid var(--line)}
+.menu li.on{color:var(--purple);font-weight:600}
+.menu li.sm{font-size:14px;font-weight:600}
+.side .lbl{color:var(--muted);font-size:14px;margin-top:22px}
+.quota{margin-top:26px;font-size:13px}
+.quota b{display:block}
+.quota .red{color:var(--pink)}
+.main{flex:1;padding-left:6px}
+.main h1{font-size:34px;margin:24px 0 18px;display:flex;align-items:center}
+.main h1 .sp{flex:1}
+.sort{font-size:14px;font-weight:600;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px}
+.card{cursor:pointer}
+.thumb{height:132px;border-radius:10px;position:relative;overflow:hidden}
+.card .t{display:flex;justify-content:space-between;margin-top:10px;font-weight:700;font-size:15px}
+.card .m{font-size:12px;color:var(--muted);margin-top:3px}
+.newcard .thumb{background:#f0f0f4;border:1.5px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:40px;color:#888}
+.dots{background:none;border:0;font-size:18px;color:#555;padding:0 4px;position:relative}
+.pop{position:absolute;right:0;top:24px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 24px #0002;z-index:30;min-width:210px;text-align:left}
+.pop div{padding:10px 14px;font-weight:500;font-size:14px;cursor:pointer;white-space:nowrap}
+.pop div:hover{background:#f5f3ff}
+/* board */
+.board{min-height:100vh;display:flex;flex-direction:column}
+.bhead{padding:14px 26px 22px;color:#fff;background:rgba(0,0,0,.18)}
+.btop{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.btop .logo{font-weight:800;font-size:20px;cursor:pointer}
+.btop .sp{flex:1}
+.pill{background:rgba(255,255,255,.2);color:#fff;border:0;border-radius:10px;padding:9px 14px;font-weight:700;font-size:14px}
+.pill:hover{background:rgba(255,255,255,.32)}
+.bmeta{font-size:13px;opacity:.9}
+.btitle{font-size:26px;font-weight:800;margin:2px 0;outline:none;border-radius:6px;padding:0 4px;margin-left:-4px}
+.btitle:focus{background:rgba(255,255,255,.2)}
+.cols{display:flex;gap:16px;padding:16px 70px 120px;align-items:flex-start;overflow-x:auto;flex:1}
+.col{width:256px;flex:none;min-height:60px;border-radius:14px;padding:2px}
+.col.over{outline:2px dashed #fff;outline-offset:4px}
+.coltitle{display:flex;color:#fff;font-weight:700;margin:0 4px 10px;gap:6px}
+.coltitle span{flex:1;outline:none;padding:2px 4px;border-radius:5px}
+.coltitle span:focus{background:rgba(255,255,255,.25)}
+.coltitle button{background:none;border:0;color:#fff;font-size:18px}
+.post{background:#fff;border-radius:12px;padding:14px 12px 12px;margin-bottom:12px;box-shadow:0 2px 8px #0002;position:relative;font-size:14px;line-height:1.5;color:#222}
+.post h4{margin:0 22px 6px 0;font-size:17px;line-height:1.3}
+.post .body{white-space:pre-wrap;word-wrap:break-word}
+.post .dots{position:absolute;right:6px;top:8px}
+.post img{max-width:100%;border-radius:8px;margin-top:8px}
+.post.dragging{opacity:.4}
+.addcol{width:200px;flex:none;background:rgba(255,255,255,.2);color:#fff;border:0;border-radius:12px;padding:12px;font-weight:700}
+.fab{position:fixed;right:70px;bottom:36px;background:#6ee7f3;color:#0b3b44;border:0;border-radius:14px;padding:16px 22px;font-size:18px;font-weight:700;box-shadow:0 4px 16px #0004}
+/* modal */
+.back{position:fixed;inset:0;background:#0006;display:flex;align-items:center;justify-content:center;z-index:50}
+.modal{background:#fff;border-radius:16px;padding:22px;width:min(480px,92vw);max-height:90vh;overflow:auto;color:#222}
+.modal h2{margin:0 0 14px}
+.modal input[type=text],.modal textarea,.modal select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;font:inherit;margin-bottom:10px}
+.modal textarea{min-height:150px;resize:vertical}
+.modal .row{display:flex;gap:8px;justify-content:flex-end;margin-top:6px;flex-wrap:wrap}
+.btn{border:0;border-radius:10px;padding:10px 18px;font-weight:700;background:#eee}
+.btn.pri{background:var(--purple);color:#fff}
+.swatches{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.sw{width:56px;height:36px;border-radius:8px;border:3px solid transparent;cursor:pointer}
+.sw.on{border-color:#222}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:12px 20px;border-radius:12px;z-index:99;font-size:14px}
+.empty{color:var(--muted);padding:30px 0}
+
+.comp{position:fixed;right:30px;bottom:0;width:400px;max-width:96vw;height:min(540px,88vh);background:#fff;border-radius:22px 22px 0 0;box-shadow:0 8px 40px #0005;z-index:60;display:flex;flex-direction:column;color:#222}
+.comp.big{width:min(760px,96vw);height:92vh}
+.comp.min{height:64px}
+.comp.min .cmain,.comp.min .cfoot{display:none}
+.chead{display:flex;align-items:center;gap:8px;padding:14px 16px}
+.chead .sp{flex:1}
+.ic{width:40px;height:40px;border-radius:50%;border:0;background:#eef0f3;font-size:17px}
+.pub{border:0;border-radius:24px;padding:13px 22px;font-weight:700;font-size:16px;background:var(--purple);color:#fff}
+.pub:disabled{background:#eceef2;color:#aab;cursor:default}
+.cmain{flex:1;overflow:auto;padding:0 20px}
+.ctitle{width:100%;border:0;outline:none;font:inherit;font-size:22px;font-weight:700;padding:10px 0;background:transparent}
+.tools{display:flex;border:1.5px dashed #d5d8de;border-radius:12px;overflow:hidden;height:160px;margin-top:6px;background:#f7f8fa}
+.tool{flex:1;display:flex;align-items:center;justify-content:center;font-size:22px;color:#8a8f99;cursor:pointer;border-right:1px solid #eceef2}
+.tool:hover{background:#ecebff;color:var(--purple)}
+.tool.all{font-size:11px;text-align:center;line-height:1.3;flex:1.3}
+.thint{font-size:11px;color:#9aa;margin:6px 4px 10px}
+.arow{display:flex;align-items:center;gap:10px;background:#f3f4f7;border-radius:10px;padding:6px 8px;margin-bottom:6px;font-size:13px}
+.arow span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arow button{border:0;background:none;font-size:15px}
+.aprev{width:40px;height:40px;border-radius:8px;background:#e3e5ea;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:20px}
+.aprev img{width:100%;height:100%;object-fit:cover;margin:0;border-radius:0}
+.ctext{width:100%;min-height:130px;border:0;outline:none;resize:none;font:inherit;font-size:18px;background:transparent;padding:8px 0}
+.cfoot{display:flex;gap:10px;align-items:center;padding:10px 18px 14px;border-top:1px solid #0001}
+.cfoot select{border:0;background:transparent;font:inherit;font-size:14px;color:#555;max-width:140px}
+.fld{border:0;background:none;font-weight:700;color:#555;font-size:14px}
+.post .lnk{display:block;margin-top:8px;color:#5b3fd0;word-break:break-all;font-weight:600}
+.fab{z-index:40}
+
+.secrow{display:flex;align-items:center;gap:10px;margin:6px 0 10px}
+.secrow input{width:90px;border:1.5px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:22px;font-weight:700;text-align:center}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:7px 12px}
+.show{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;color:#fff}
+.show .shov{position:absolute;inset:0;background:rgba(0,0,0,.22);pointer-events:none}
+.shtop{position:relative;padding:26px 48px 6px;font-size:34px;font-weight:800;text-shadow:0 2px 10px #0004}
+.shsub{position:relative;padding:0 48px;font-size:14px;opacity:.85}
+.shbody{position:relative;flex:1;display:flex;flex-wrap:wrap;gap:20px;justify-content:center;align-content:flex-start;align-items:flex-start;overflow:auto;padding:22px 40px 100px}
+.slp{width:min(400px,92vw);background:#fff;color:#222;border-radius:18px;padding:20px;font-size:19px;line-height:1.5;box-shadow:0 6px 24px #0004;animation:shin .45s ease}
+.slp.one{width:min(860px,94vw);font-size:25px}
+.slp h4{margin:0 0 8px;font-size:1.25em;line-height:1.3}
+.slp img,.slp video{max-width:100%;border-radius:10px;margin-top:8px}
+.slp .body{white-space:pre-wrap;word-wrap:break-word}
+.slp .lnk{display:block;margin-top:8px;color:#5b3fd0;word-break:break-all;font-weight:600}
+@keyframes shin{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.shctl{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);display:flex;align-items:center;gap:10px;padding:12px 24px 16px;flex-wrap:wrap}
+.shctl .ic{background:rgba(255,255,255,.2);color:#fff}
+.shctl .cnt{font-weight:700;margin:0 8px}
+.shctl .sp2{flex:1}
+.shctl label{font-size:13px;display:flex;align-items:center;gap:6px}
+.shctl input{width:64px;border:0;border-radius:8px;padding:7px;font:inherit;text-align:center}
+.shprog{position:absolute;left:0;top:0;height:4px;width:100%;background:rgba(255,255,255,.25)}
+.shprog i{display:block;height:100%;width:0;background:#fff}
+@keyframes shp{from{width:0}to{width:100%}}
+
+.nav{flex-wrap:wrap}
+.btop{flex-wrap:wrap}
+.modal.wide{width:min(640px,94vw)}
+.modal input[type=email],.modal input[type=password],.modal input[type=number]{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;font:inherit;margin-bottom:10px}
+.shopts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.shopt{border:1.5px solid var(--line);background:#fafaff;border-radius:12px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:4px;color:#222}
+.shopt:hover{border-color:var(--purple);background:#f3efff}
+.shopt small{color:#777;font-size:12px;line-height:1.3}
+.tabs{display:flex;gap:6px;margin-bottom:14px}
+.tabs button{flex:1;border:0;border-radius:10px;padding:10px;font-weight:700;background:#eee}
+.tabs button.on{background:var(--purple);color:#fff}
+.hint{color:#777;font-size:13px;margin:0 0 10px}
+.gbtn{width:100%;background:#fff;border:1.5px solid #dadce0;margin-top:8px}
+.divider{text-align:center;color:#999;margin:14px 0 6px;font-size:13px}
+.roomc{border:1.5px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.roomc .rh{display:flex;align-items:center;gap:8px}
+.roomc .rh b{flex:1}
+.roomc .rb{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.mini{padding:7px 12px;font-size:13px}
+.code{font-family:monospace;background:#f1efff;color:#5b3fd0;padding:2px 8px;border-radius:6px;font-size:12px}
+.chk{display:flex;gap:8px;align-items:center;padding:5px 0}
+.avatar{cursor:pointer}
+/* print area */
+#printArea{display:none}
+@media print{
+ body>*:not(#printArea){display:none!important}
+ #printArea{display:block!important;font-family:"Segoe UI",Arial,sans-serif;color:#000;background:#fff}
+ #printArea h1{font-size:26px;margin:0}
+ #printArea .pm{color:#666;font-size:12px;margin-bottom:12px}
+ #printArea h2{font-size:18px;border-bottom:2px solid #8b5cf6;padding-bottom:4px;margin:18px 0 8px}
+ #printArea .pp{border:1px solid #ccc;border-radius:8px;padding:10px;margin-bottom:8px;page-break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ #printArea h3{margin:0 0 4px;font-size:15px}
+ #printArea .pb{white-space:pre-wrap;font-size:13px;line-height:1.45}
+ #printArea img{max-width:100%;max-height:320px;margin:4px 0}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ DASHBOARD ============ -->
+<div id="dashView">
+  <div class="nav">
+    <span class="logo">🪁</span><b>Личное ▾</b>
+    <a class="on">Главная</a><span class="sep">/</span><a>Галерея</a><span class="sep">/</span><a>Обучение</a><span class="sep">/</span><a>Присоединиться</a><span class="sep">/</span>
+    <a class="create" onclick="newBoard()">+ Создать</a>
+    <span class="sp"></span>
+    <button class="pill" style="background:#eef;color:#5b3fd0" onclick="document.getElementById('fileIn').click()">📂 Досканы файлдан ашу</button>
+    <button class="pill" style="background:#eef;color:#5b3fd0" onclick="exportAll()">💾 Барлығын сақтау</button>
+    <span class="avatar acctAv" onclick="openAccount()" title="Кіру / тіркелу">A</span>
+  </div>
+  <div class="dash">
+    <div class="side">
+      <h3 class="hello" id="helloName">Привет, Айдар!</h3>
+      <div class="hello" style="font-size:17px;margin-top:-6px">Надеемся, у вас выдался отличный день!</div>
+      <div class="small">Отсутствует информация о вашей школе</div>
+      <button class="pinkbtn">Добавить информацию о...</button>
+      <div class="search">🔍<input id="q" placeholder="Поиск padlet" oninput="renderDash()"></div>
+      <ul class="menu">
+        <li data-f="recent" onclick="setF('recent')">🕘 Недавние</li>
+        <li data-f="made" onclick="setF('made')">✏️ Сделано мной</li>
+        <li data-f="trash" onclick="setF('trash')">🗑 В корзине</li>
+      </ul>
+      <div class="lbl">Закладки</div>
+      <ul class="menu">
+        <li onclick="setF('fav')">📁 Избранное</li>
+        <li onclick="openMyRooms()">🚪 Мои комнаты</li>
+        <li onclick="document.getElementById('fileIn').click()">📥 Импорт</li>
+        <li class="sm">📂 Новая папка</li>
+      </ul>
+      <div class="quota"><b>Personal Neon</b><span class="red" id="quotaN"></span> padlet использовано</div>
+    </div>
+    <div class="main">
+      <h1><span id="dashTitle">Сделано мной</span><span class="sp"></span><span class="sort">Имя &nbsp; <span style="color:var(--purple)">По времени последнего изменения</span></span></h1>
+      <div class="grid" id="grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ BOARD ============ -->
+<div id="boardView" class="board hidden">
+  <div class="bhead">
+    <div class="btop">
+      <span class="logo" onclick="goHome()">◀ Padlet</span>
+      <span class="sp"></span>
+      <button class="pill" onclick="openShow()">▶ Слайд-шоу</button>
+      <button class="pill" onclick="openStyle()">🎨 Фон</button>
+      <button class="pill" onclick="saveBoardFile()">💾 Досканы компьютерге сақтау</button>
+      <button class="pill" onclick="document.getElementById('fileIn').click()">📂 Файлдан жүктеу</button>
+      <button class="pill" onclick="printBoard()">🖨 Печать</button>
+      <button class="pill" onclick="openShare()">🔗 Поделиться</button>
+      <button class="pill" onclick="openRooms()">🚪 Комнаты</button>
+      <span class="avatar acctAv" onclick="openAccount()" title="Кіру / тіркелу" style="background:#fff;color:#6d28d9">A</span>
+    </div>
+    <div class="bmeta" id="bmeta"></div>
+    <div class="btitle" id="btitle" contenteditable="true" spellcheck="false"></div>
+  </div>
+  <div class="cols" id="cols"></div>
+  <button class="fab" onclick="openPost()">＋ Добавить пост</button>
+</div>
+
+<input type="file" id="fileIn" accept=".json,.padlet,application/json" class="hidden" multiple>
+<div id="modalHost"></div>
+<div id="printArea"></div>
+
+<script>
+const KEY='padlet_clone_v1';
+const GRADS=[
+ 'linear-gradient(135deg,#9333ea,#ec4899)','linear-gradient(135deg,#f59e0b,#fbbf24)',
+ 'linear-gradient(135deg,#15803d,#166534)','linear-gradient(135deg,#f97316,#be123c,#7c3aed)',
+ 'linear-gradient(135deg,#0ea5e9,#6366f1)','linear-gradient(135deg,#14b8a6,#22c55e)',
+ 'linear-gradient(135deg,#334155,#0f172a)','linear-gradient(135deg,#f43f5e,#fb923c)'];
+let S={boards:[],filter:'made'};
+let cur=null;
+
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.boards)S=s}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Браузерде сақтау мүмкін болмады — файлға сақтаңыз')}}
+function uid(){return Math.random().toString(36).slice(2,10)+Date.now().toString(36)}
+function esc(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2800)}
+function ago(ts){const d=(Date.now()-ts)/864e5;if(d<1)return 'сегодня';if(d<30)return Math.floor(d)+' дн.';if(d<365)return Math.floor(d/30)+' мес.';return Math.floor(d/365)+' г.'}
+
+/* ---------- dashboard ---------- */
+const TITLES={made:'Сделано мной',recent:'Недавние',trash:'В корзине',fav:'Избранное'};
+function setF(f){S.filter=f;save();renderDash()}
+function renderDash(){
+  document.querySelectorAll('.menu li[data-f]').forEach(li=>li.classList.toggle('on',li.dataset.f===S.filter));
+  document.getElementById('dashTitle').textContent=TITLES[S.filter]||'';
+  const q=document.getElementById('q').value.toLowerCase();
+  let list=S.boards.filter(b=>visible(b)&&(S.filter==='trash'?b.trashed:!b.trashed));
+  if(S.filter==='fav')list=list.filter(b=>b.fav);
+  if(S.filter==='recent')list=list.slice().sort((a,b)=>(b.opened||0)-(a.opened||0));
+  else list=list.slice().sort((a,b)=>b.updated-a.updated);
+  list=list.filter(b=>b.title.toLowerCase().includes(q));
+  const g=document.getElementById('grid');g.innerHTML='';
+  if(S.filter!=='trash'){
+    const n=document.createElement('div');n.className='card newcard';
+    n.innerHTML='<div class="thumb">+</div><div class="t" style="font-weight:500;color:#666">Создать padlet</div>';
+    n.onclick=newBoard;g.appendChild(n);
+  }
+  list.forEach(b=>{
+    const c=document.createElement('div');c.className='card';
+    c.innerHTML=`<div class="thumb" style="background:${b.bg}"></div>
+      <div class="t"><span>${esc(b.title)}</span><span style="position:relative"><button class="dots">⋮</button></span></div>
+      <div class="m">${esc(b.author)} • ${ago(b.created)}</div>`;
+    c.querySelector('.thumb').onclick=c.querySelector('.t span').onclick=()=>{if(!b.trashed)openBoard(b.id)};
+    c.querySelector('.dots').onclick=e=>{e.stopPropagation();cardMenu(e.target.parentNode,b)};
+    g.appendChild(c);
+  });
+  if(!list.length&&S.filter!=='made')g.insertAdjacentHTML('beforeend','<div class="empty">Бос</div>');
+  document.getElementById('quotaN').textContent=S.boards.filter(b=>!b.trashed&&visible(b)).length+' из ∞';
+}
+function closePops(){document.querySelectorAll('.pop').forEach(p=>p.remove())}
+document.addEventListener('click',closePops);
+function popup(host,items){closePops();const p=document.createElement('div');p.className='pop';
+  items.forEach(([t,fn])=>{const d=document.createElement('div');d.textContent=t;d.onclick=e=>{e.stopPropagation();closePops();fn()};p.appendChild(d)});
+  host.appendChild(p)}
+function cardMenu(host,b){
+  if(b.trashed)return popup(host,[['↩ Қалпына келтіру',()=>{b.trashed=false;save();renderDash()}],['❌ Мүлдем жою',()=>{if(confirm('Мүлдем жоясыз ба?')){S.boards=S.boards.filter(x=>x!==b);save();renderDash()}}]]);
+  popup(host,[
+    ['💾 Компьютерге сақтау (файл)',()=>downloadBoard(b)],
+    [b.fav?'★ Таңдаулыдан алу':'☆ Таңдаулыға қосу',()=>{b.fav=!b.fav;save();renderDash()}],
+    ['📄 Көшірме жасау',()=>{const c=JSON.parse(JSON.stringify(b));c.id=uid();c.title+=' (көшірме)';c.created=c.updated=Date.now();S.boards.push(c);save();renderDash()}],
+    ['🗑 Себетке салу',()=>{b.trashed=true;save();renderDash()}]]);
+}
+function newBoard(){
+  const bg=GRADS[Math.floor(Math.random()*GRADS.length)];
+  const b={id:uid(),title:'Жаңа тақта',author:(curUser()?curUser().name:'Айдар Шайхимов'),owner:(curUser()?curUser().id:undefined),bg,created:Date.now(),updated:Date.now(),opened:Date.now(),
+    cols:[{id:uid(),title:'',posts:[]}]};
+  S.boards.push(b);save();openBoard(b.id);
+}
+
+/* ---------- board ---------- */
+function B(){return S.boards.find(b=>b.id===cur)}
+function openBoard(id){
+  cur=id;const b=B();b.opened=Date.now();save();
+  dashView.classList.add('hidden');boardView.classList.remove('hidden');
+  renderBoard();window.scrollTo(0,0);
+}
+function goHome(){cur=null;boardView.classList.add('hidden');dashView.classList.remove('hidden');renderDash()}
+function touch(){B().updated=Date.now();save()}
+function renderBoard(){
+  const b=B();boardView.style.background=b.bg;
+  bmeta.textContent=b.author+' • '+ago(b.created);
+  btitle.textContent=b.title;
+  const cs=document.getElementById('cols');cs.innerHTML='';
+  b.cols.forEach(col=>{
+    const d=document.createElement('div');d.className='col';d.dataset.id=col.id;
+    d.innerHTML=`<div class="coltitle"><span contenteditable="true" spellcheck="false" data-ph="Бөлім атауы">${esc(col.title)}</span><button title="Бөлімді жою">✕</button></div>`;
+    const sp=d.querySelector('span');
+    sp.oninput=()=>{col.title=sp.textContent;touch()};
+    d.querySelector('button').onclick=()=>{if(col.posts.length&&!confirm('Бөлім мен посттар жойылады. Жалғастырамыз ба?'))return;b.cols=b.cols.filter(c=>c!==col);if(!b.cols.length)b.cols.push({id:uid(),title:'',posts:[]});touch();renderBoard()};
+    col.posts.forEach(p=>d.appendChild(postEl(col,p)));
+    d.ondragover=e=>{e.preventDefault();d.classList.add('over')};
+    d.ondragleave=()=>d.classList.remove('over');
+    d.ondrop=e=>{e.preventDefault();d.classList.remove('over');const pid=e.dataTransfer.getData('text');
+      let moved;b.cols.forEach(c=>{const i=c.posts.findIndex(p=>p.id===pid);if(i>=0)moved=c.posts.splice(i,1)[0]});
+      if(moved){const after=[...d.querySelectorAll('.post')].find(el=>e.clientY<el.getBoundingClientRect().top+el.offsetHeight/2);
+        const idx=after?col.posts.findIndex(p=>p.id===after.dataset.id):col.posts.length;col.posts.splice(idx<0?col.posts.length:idx,0,moved);touch();renderBoard()}};
+    cs.appendChild(d);
+  });
+  const a=document.createElement('button');a.className='addcol';a.textContent='＋ Бөлім қосу';
+  a.onclick=()=>{b.cols.push({id:uid(),title:'Жаңа бөлім',posts:[]});touch();renderBoard()};
+  cs.appendChild(a);
+}
+btitle.oninput=()=>{B().title=btitle.textContent;touch()};
+btitle.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();btitle.blur()}};
+function attHTML(a){
+  if(a.t==='image')return `<img src="${a.src}">`;
+  if(a.t==='video')return `<video controls src="${a.src}" style="width:100%;border-radius:8px;margin-top:8px"></video>`;
+  if(a.t==='audio')return `<audio controls src="${a.src}" style="width:100%;margin-top:8px"></audio>`;
+  if(a.t==='link')return `<a class="lnk" href="${esc(a.url)}" target="_blank" rel="noopener">🔗 ${esc(a.url)}</a>`;
+  return `<a class="lnk" href="${a.src}" download="${esc(a.name)}">📎 ${esc(a.name)}</a>`;
+}
+function postEl(col,p){
+  const d=document.createElement('div');d.className='post';d.dataset.id=p.id;d.draggable=true;
+  if(p.color)d.style.background=p.color;
+  const att=(p.att||[]).concat(p.img?[{t:'image',src:p.img}]:[]);
+  d.innerHTML=`<button class="dots">⋮</button>${p.title?`<h4>${esc(p.title)}</h4>`:''}${att.map(attHTML).join('')}<div class="body">${esc(p.body)}</div>`;
+  d.ondragstart=e=>{e.dataTransfer.setData('text',p.id);d.classList.add('dragging')};
+  d.ondragend=()=>d.classList.remove('dragging');
+  d.ondblclick=()=>openPost(p,col);
+  d.querySelector('.dots').onclick=e=>{e.stopPropagation();
+    popup(e.target.parentNode,[['✏️ Өзгерту',()=>openPost(p,col)],['🗑 Жою',()=>{if(confirm('Постты жоясыз ба?')){col.posts=col.posts.filter(x=>x!==p);touch();renderBoard()}}]])};
+  return d;
+}
+const COLORS=[['Белый','#ffffff'],['Зелёный','#dcfce7'],['Жёлтый','#fef3c7'],['Синий','#dbeafe'],['Розовый','#fce7f3'],['Фиолетовый','#ede9fe']];
+function openPost(p,col){
+  const b=B();const edit=!!p;
+  p=p||{id:uid(),title:'',body:'',color:'#ffffff',att:[]};
+  let att=(p.att||[]).slice();
+  if(p.img){att.push({t:'image',src:p.img})}
+  const colOpts=b.cols.map(c=>`<option value="${c.id}" ${(col?c===col:c===b.cols[0])?'selected':''}>${esc(c.title||'Бөлім')}</option>`).join('');
+  modalHost.innerHTML=`<div class="comp" id="comp">
+   <div class="chead"><button class="ic" id="cX" title="Жабу">✕</button><button class="ic" id="cE" title="Үлкейту">⇱</button><button class="ic" id="cM" title="Жасыру">—</button><span class="sp"></span><button class="pub" id="cP" disabled>Опубликовать</button></div>
+   <div class="cmain">
+    <input class="ctitle" id="pT" placeholder="Тема" value="${esc(p.title)}">
+    <div class="tools">
+      <label class="tool" title="Жүктеу"><input type="file" id="fUp" hidden>⬆</label>
+      <label class="tool" title="Камера"><input type="file" id="fCam" accept="image/*" capture="environment" hidden>📷</label>
+      <label class="tool" title="Видео"><input type="file" id="fVid" accept="video/*" hidden>🎬</label>
+      <label class="tool" title="Аудио"><input type="file" id="fAud" accept="audio/*" hidden>🎵</label>
+      <div class="tool" id="tLink" title="Сілтеме">🔗</div>
+      <label class="tool all" title="Все инструменты"><input type="file" id="fAll" hidden>Все<br>инструменты</label>
+    </div>
+    <div class="thint">Добавь изображение, видео, аудио, ссылка или файл.</div>
+    <div id="attList"></div>
+    <textarea class="ctext" id="pB" placeholder="Напишите что-нибудь чудесное...">${esc(p.body)}</textarea>
+   </div>
+   <div class="cfoot">
+     <select id="pClr">${COLORS.map(([n,c])=>`<option value="${c}" ${c===(p.color||'#ffffff')?'selected':''}>⚪ ${n}</option>`).join('')}</select>
+     <button class="fld" id="cF">＋ Поля</button>
+     <select id="pC" class="hidden">${colOpts}</select>
+   </div></div>`;
+  const comp=document.getElementById('comp');
+  const check=()=>{cP.disabled=!(pT.value.trim()||pB.value.trim()||att.length)};
+  function renderAtt(){
+    attList.innerHTML=att.map((a,i)=>`<div class="arow"><div class="aprev">${a.t==='image'?`<img src="${a.src}">`:a.t==='link'?'🔗':a.t==='video'?'🎬':a.t==='audio'?'🎵':'📎'}</div><span>${esc(a.name||a.url||a.t)}</span><button data-i="${i}">✕</button></div>`).join('');
+    attList.querySelectorAll('button').forEach(x=>x.onclick=()=>{att.splice(+x.dataset.i,1);renderAtt()});
+    check();
+  }
+  function addFile(f){
+    if(!f)return;
+    const kind=f.type.startsWith('image/')?'image':f.type.startsWith('video/')?'video':f.type.startsWith('audio/')?'audio':'file';
+    if(kind!=='image'&&f.size>2.5*1024*1024)return toast('Файл тым үлкен (2.5 МБ-тан кем болсын)');
+    const r=new FileReader();
+    r.onload=()=>{
+      if(kind==='image'){const im=new Image();im.onload=()=>{const k=Math.min(1,900/im.width);const c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);att.push({t:'image',src:c.toDataURL('image/jpeg',.82),name:f.name});renderAtt()};im.src=r.result}
+      else{att.push({t:kind,src:r.result,name:f.name});renderAtt()}
+    };
+    r.readAsDataURL(f);
+  }
+  ['fUp','fCam','fVid','fAud','fAll'].forEach(id=>{const el=document.getElementById(id);el.onchange=()=>{addFile(el.files[0]);el.value=''}});
+  tLink.onclick=()=>{let u=prompt('Сілтемені енгізіңіз:');if(!u)return;u=u.trim();if(!/^[a-z]+:\/\//i.test(u))u='https://'+u;att.push({t:'link',url:u});renderAtt()};
+  pT.oninput=check;pB.oninput=check;
+  pClr.onchange=()=>{comp.style.background=pClr.value};comp.style.background=pClr.value;
+  cF.onclick=()=>pC.classList.toggle('hidden');
+  cX.onclick=()=>modalHost.innerHTML='';
+  cM.onclick=()=>comp.classList.toggle('min');
+  cE.onclick=()=>comp.classList.toggle('big');
+  cP.onclick=()=>{
+    p.title=pT.value.trim();p.body=pB.value;p.color=pClr.value;p.att=att;delete p.img;
+    const target=b.cols.find(c=>c.id===pC.value)||b.cols[0];
+    if(edit){b.cols.forEach(c=>c.posts=c.posts.filter(x=>x!==p))}
+    target.posts.push(p);touch();modalHost.innerHTML='';renderBoard();
+  };
+  renderAtt();pT.focus();
+}
+function openStyle(){
+  const b=B();
+  modalHost.innerHTML=`<div class="back"><div class="modal"><h2>Тақта фоны</h2>
+  <div class="swatches">${GRADS.map(g=>`<div class="sw" data-g="${g}" style="background:${g};width:80px;height:50px"></div>`).join('')}</div>
+  <div class="row"><button class="btn pri" id="sX">Жабу</button></div></div></div>`;
+  document.querySelector('.swatches').onclick=e=>{if(e.target.dataset.g){b.bg=e.target.dataset.g;touch();renderBoard()}};
+  sX.onclick=()=>modalHost.innerHTML='';
+}
+
+/* ---------- slideshow ---------- */
+function openShow(){
+  const b=B();
+  if(!b.cols.some(c=>c.posts.length))return toast('Слайдқа қоятын пост жоқ');
+  modalHost.innerHTML=`<div class="back"><div class="modal"><h2>▶ Слайд-шоу</h2>
+   <p style="margin:0 0 10px;color:#666;font-size:14px">Әр бөлім бір слайд болып көрсетіледі (бос бөлімдер өткізіледі). Бір слайд неше секунд тұрсын?</p>
+   <div class="secrow"><button class="btn" id="sMin">−</button><input type="number" id="sSec" min="1" max="600" value="${S.secs||5}"><span>секунд</span><button class="btn" id="sPlus">+</button></div>
+   <div class="chips">${[3,5,10,15,30,60].map(n=>`<button class="btn chip" data-n="${n}">${n} с</button>`).join('')}</div>
+   <label style="display:block;margin:14px 0 4px"><input type="checkbox" id="sLoop" ${S.loop?'checked':''}> Қайталау (соңына жеткенде басына оралу)</label>
+   <div class="row"><button class="btn" id="sCancel">Бас тарту</button><button class="btn pri" id="sGo">▶ Бастау</button></div></div></div>`;
+  const get=()=>Math.max(1,Math.min(600,parseInt(sSec.value)||5));
+  sMin.onclick=()=>sSec.value=Math.max(1,get()-1);
+  sPlus.onclick=()=>sSec.value=Math.min(600,get()+1);
+  document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>sSec.value=c.dataset.n);
+  sCancel.onclick=()=>modalHost.innerHTML='';
+  sGo.onclick=()=>{S.secs=get();S.loop=sLoop.checked;save();modalHost.innerHTML='';startShow(S.secs,S.loop)};
+  sSec.focus();sSec.select();
+}
+function slideHTML(p,one){
+  const att=(p.att||[]).concat(p.img?[{t:'image',src:p.img}]:[]);
+  return `<div class="slp${one?' one':''}" style="background:${p.color||'#fff'}">${p.title?`<h4>${esc(p.title)}</h4>`:''}${att.map(attHTML).join('')}<div class="body">${esc(p.body)}</div></div>`;
+}
+function startShow(secs,loop,opts){
+  const b=opts||B(),slides=b.cols.filter(c=>c.posts.length),n=slides.length;
+  let i=0,paused=false,timer=null,sec=secs;
+  const ov=document.createElement('div');ov.className='show';ov.style.background=b.bg;
+  ov.innerHTML=`<div class="shov"></div><div class="shprog"><i id="shBar"></i></div>
+   <div class="shtop" id="shTitle"></div><div class="shsub">${esc(b.title)}</div>
+   <div class="shbody" id="shBody"></div>
+   <div class="shctl">
+     <button class="ic" id="shPrev" title="Алдыңғы">◀</button>
+     <button class="ic" id="shPlay" title="Үзіліс / жалғастыру">⏸</button>
+     <button class="ic" id="shNext" title="Келесі">▶</button>
+     <span class="cnt" id="shCnt"></span>
+     <span class="sp2"></span>
+     <label>Секунд: <input type="number" id="shSec" min="1" max="600" value="${sec}"></label>
+     <button class="ic" id="shFs" title="Толық экран">⛶</button>
+     <button class="ic" id="shX" title="Жабу (Esc)">✕</button>
+   </div>`;
+  document.body.appendChild(ov);
+  const $=id=>ov.querySelector('#'+id);
+  function restartBar(){
+    const bar=$('shBar');bar.style.animation='none';void bar.offsetWidth;
+    if(!paused)bar.style.animation=`shp ${sec}s linear forwards`;
+  }
+  function arm(){clearTimeout(timer);if(!paused)timer=setTimeout(next,sec*1000)}
+  function render(){
+    const c=slides[i];
+    $('shTitle').textContent=c.title||('Бөлім '+(i+1));
+    $('shBody').innerHTML=c.posts.map(p=>slideHTML(p,c.posts.length===1)).join('');
+    $('shBody').scrollTop=0;
+    $('shCnt').textContent=(i+1)+' / '+n;
+    $('shPlay').textContent=paused?'▶':'⏸';
+    restartBar();arm();
+  }
+  function next(){
+    if(i<n-1)i++;
+    else if(loop)i=0;
+    else{paused=true;clearTimeout(timer);$('shPlay').textContent='▶';$('shBar').style.animation='none';$('shBar').style.width='100%';return}
+    render();
+  }
+  function prev(){i=i>0?i-1:(loop?n-1:0);render()}
+  function close(){clearTimeout(timer);document.removeEventListener('keydown',key);
+    if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen().catch(()=>{});ov.remove()}
+  function key(e){
+    if(e.key==='Escape')close();
+    else if(e.key==='ArrowRight'||e.key==='PageDown')next();
+    else if(e.key==='ArrowLeft'||e.key==='PageUp')prev();
+    else if(e.key===' '&&e.target.tagName!=='INPUT'){e.preventDefault();$('shPlay').click()}
+  }
+  $('shNext').onclick=next;$('shPrev').onclick=prev;$('shX').onclick=close;
+  $('shPlay').onclick=()=>{paused=!paused;if(!paused&&i===n-1&&!loop&&$('shBar').style.width==='100%'){i=0}$('shBar').style.width='';render()};
+  $('shFs').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen();else if(ov.requestFullscreen)ov.requestFullscreen().catch(()=>{})};
+  $('shSec').onchange=e=>{sec=Math.max(1,Math.min(600,parseInt(e.target.value)||sec));e.target.value=sec;S.secs=sec;save();restartBar();arm()};
+  document.addEventListener('keydown',key);
+  if(ov.requestFullscreen)ov.requestFullscreen().catch(()=>{});
+  render();
+}
+
+/* ---------- accounts ---------- */
+const UKEY='padlet_users_v1',SKEY='padlet_session_v1',GKEY='padlet_gcid';
+function users(){try{return JSON.parse(localStorage.getItem(UKEY))||[]}catch(e){return []}}
+function saveUsers(u){try{localStorage.setItem(UKEY,JSON.stringify(u))}catch(e){toast('Сақтау мүмкін болмады')}}
+function curUser(){try{const id=localStorage.getItem(SKEY);return users().find(u=>u.id===id)||null}catch(e){return null}}
+function setSession(id){try{if(id)localStorage.setItem(SKEY,id);else localStorage.removeItem(SKEY)}catch(e){}}
+function visible(b){const u=curUser();return !b.owner||(u&&b.owner===u.id)}
+async function hashPw(pw,salt){
+  if(window.crypto&&crypto.subtle){
+    const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+':'+pw));
+    return [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('');
+  }
+  let h=5381;const t=salt+pw;for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return 'x'+h;
+}
+function refreshUser(){
+  const u=curUser();
+  document.querySelectorAll('.acctAv').forEach(e=>{e.textContent=u?(u.name.trim()[0]||'?').toUpperCase():'👤';e.title=u?u.email:'Кіру / тіркелу'});
+  const h=document.getElementById('helloName');
+  if(h)h.textContent=u?('Привет, '+u.name.trim().split(' ')[0]+'!'):'Привет, Айдар!';
+}
+function afterLogin(){
+  modalHost.innerHTML='';refreshUser();
+  if(cur)goHome();else renderDash();
+  toast('Сәтті кірдіңіз: '+curUser().name);
+}
+function setGcid(){
+  const v=prompt('Google OAuth Client ID (xxxx.apps.googleusercontent.com).\nGoogle Cloud Console → APIs & Services → Credentials → OAuth client ID (Web). Authorized JavaScript origins ішіне сайт мекенжайыңызды қосыңыз.',localStorage.getItem(GKEY)||'');
+  if(v===null)return;
+  try{if(v.trim())localStorage.setItem(GKEY,v.trim());else localStorage.removeItem(GKEY)}catch(e){}
+  toast('Client ID сақталды');
+  if(!curUser())openAccount('login');
+}
+function loadGsi(cb){
+  if(window.google&&google.accounts&&google.accounts.id)return cb();
+  const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.async=true;
+  s.onload=cb;s.onerror=()=>toast('Google скриптін жүктеу мүмкін болмады (интернетті тексеріңіз)');
+  document.head.appendChild(s);
+}
+function jwtPayload(t){
+  const b=t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+  return JSON.parse(decodeURIComponent(atob(b).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+}
+function googleSignIn(p){
+  const mail=(p.email||'').toLowerCase();
+  if(!mail)return toast('Google email бермеді');
+  const us=users();let x=us.find(y=>y.email===mail);
+  if(!x){x={id:uid(),name:p.name||mail,email:mail,google:true,pic:p.picture||'',created:Date.now()};us.push(x);saveUsers(us)}
+  setSession(x.id);afterLogin();
+}
+function renderGoogleBtn(){
+  const w=document.getElementById('gWrap');if(!w)return;
+  const cid=localStorage.getItem(GKEY);
+  if(!cid||location.protocol==='file:'){
+    w.innerHTML=`<button class="btn gbtn" id="gFake"><b style="color:#4285f4">G</b> &nbsp;Google арқылы кіру</button>
+     <div class="hint" style="margin-top:8px">${location.protocol==='file:'
+       ?'Google кіру тек сайт http(s) арқылы ашылғанда істейді (GitHub Pages, Netlify, localhost). Қазір файл ретінде ашылып тұр.'
+       :'Google кіруді қосу үшін «⚙ Google Client ID» батырмасын басып, OAuth Client ID енгізіңіз.'}</div>`;
+    document.getElementById('gFake').onclick=()=>toast(location.protocol==='file:'?'Файл ретінде ашылғанда Google кіру істемейді':'Алдымен Google Client ID енгізіңіз');
+    return;
+  }
+  loadGsi(()=>{
+    google.accounts.id.initialize({client_id:cid,callback:r=>{try{googleSignIn(jwtPayload(r.credential))}catch(e){toast('Google жауабы дұрыс емес')}}});
+    google.accounts.id.renderButton(w,{theme:'outline',size:'large',text:'signin_with',width:300});
+  });
+}
+async function doAuth(tab){
+  const mail=aMail.value.trim().toLowerCase(),pw=aPass.value;
+  if(!/^\S+@\S+\.\S+$/.test(mail))return toast('Email дұрыс емес');
+  if(pw.length<6)return toast('Құпиясөз кемінде 6 таңба болсын');
+  const us=users();
+  if(tab==='reg'){
+    const name=aName.value.trim();
+    if(!name)return toast('Атыңызды жазыңыз');
+    if(us.some(x=>x.email===mail))return toast('Бұл email тіркелген — «Кіру» қойындысын таңдаңыз');
+    const salt=uid(),hash=await hashPw(pw,salt);
+    const nu={id:uid(),name,email:mail,salt,hash,created:Date.now()};
+    us.push(nu);saveUsers(us);setSession(nu.id);
+  }else{
+    const x=us.find(y=>y.email===mail);
+    if(x&&x.google&&!x.hash)return toast('Бұл Google аккаунты — Google арқылы кіріңіз');
+    if(!x||await hashPw(pw,x.salt)!==x.hash)return toast('Email немесе құпиясөз қате');
+    setSession(x.id);
+  }
+  afterLogin();
+}
+function openAccount(tab){
+  const u=curUser();
+  if(u){
+    const n=S.boards.filter(b=>b.owner===u.id&&!b.trashed).length;
+    modalHost.innerHTML=`<div class="back"><div class="modal"><h2>👤 Жеке кабинет</h2>
+     <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px"><span class="avatar" style="width:56px;height:56px;font-size:24px">${esc((u.name.trim()[0]||'?').toUpperCase())}</span>
+      <div><b style="font-size:18px">${esc(u.name)}</b><br><span style="color:#666">${esc(u.email)}</span><br><small style="color:#999">${u.google?'Google аккаунты':'Email аккаунты'}</small></div></div>
+     <p class="hint">Сіздің тақталарыңыз: ${n}. <a href="#" id="acRooms">🚪 Мои комнаты</a></p>
+     <div class="row"><button class="btn" id="acGset">⚙ Google Client ID</button><button class="btn" id="acOut">Шығу</button><button class="btn pri" id="acClose">Жабу</button></div></div></div>`;
+    acRooms.onclick=e=>{e.preventDefault();openMyRooms()};
+    acGset.onclick=setGcid;
+    acClose.onclick=()=>modalHost.innerHTML='';
+    acOut.onclick=()=>{setSession(null);modalHost.innerHTML='';refreshUser();if(cur)goHome();else renderDash();toast('Аккаунттан шықтыңыз')};
+    return;
+  }
+  tab=tab||'login';
+  modalHost.innerHTML=`<div class="back"><div class="modal"><h2>👤 Жеке кабинет</h2>
+   <div class="tabs"><button id="tLogin" class="${tab==='login'?'on':''}">Кіру</button><button id="tReg" class="${tab==='reg'?'on':''}">Тіркелу</button></div>
+   ${tab==='reg'?'<input type="text" id="aName" placeholder="Аты-жөні">':''}
+   <input type="email" id="aMail" placeholder="Email">
+   <input type="password" id="aPass" placeholder="Құпиясөз (кемінде 6 таңба)">
+   <div class="row"><button class="btn" id="aClose">Жабу</button><button class="btn pri" id="aGo">${tab==='reg'?'Тіркелу':'Кіру'}</button></div>
+   <div class="divider">— немесе —</div><div id="gWrap"></div>
+   <div class="row" style="justify-content:flex-start"><button class="btn mini" id="aGset">⚙ Google Client ID</button></div>
+   <p class="hint" style="margin:10px 0 0">Аккаунттар осы браузерде сақталады (сервер жоқ).</p></div></div>`;
+  tLogin.onclick=()=>openAccount('login');tReg.onclick=()=>openAccount('reg');
+  aClose.onclick=()=>modalHost.innerHTML='';
+  aGo.onclick=()=>doAuth(tab);
+  aPass.onkeydown=e=>{if(e.key==='Enter')aGo.click()};
+  aGset.onclick=setGcid;
+  renderGoogleBtn();
+  aMail.focus();
+}
+
+/* ---------- export: zip / docx / xlsx / print ---------- */
+function dlBlob(name,blob){
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+const CRCT=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(u){let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=CRCT[(c^u[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
+function makeZip(files,mime){
+  const enc=new TextEncoder(),parts=[],cen=[];let off=0,csz=0;
+  files.forEach(f=>{
+    const name=enc.encode(f.name),data=enc.encode(f.data),crc=crc32(data);
+    const lh=new DataView(new ArrayBuffer(30));
+    lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint16(6,0x0800,true);lh.setUint16(8,0,true);
+    lh.setUint16(10,0,true);lh.setUint16(12,0x21,true);lh.setUint32(14,crc,true);lh.setUint32(18,data.length,true);
+    lh.setUint32(22,data.length,true);lh.setUint16(26,name.length,true);lh.setUint16(28,0,true);
+    parts.push(lh.buffer,name,data);
+    const ch=new DataView(new ArrayBuffer(46));
+    ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x0800,true);
+    ch.setUint16(10,0,true);ch.setUint16(12,0,true);ch.setUint16(14,0x21,true);ch.setUint32(16,crc,true);
+    ch.setUint32(20,data.length,true);ch.setUint32(24,data.length,true);ch.setUint16(28,name.length,true);
+    ch.setUint16(30,0,true);ch.setUint16(32,0,true);ch.setUint16(34,0,true);ch.setUint16(36,0,true);
+    ch.setUint32(38,0,true);ch.setUint32(42,off,true);
+    cen.push(ch.buffer,name);
+    off+=30+name.length+data.length;csz+=46+name.length;
+  });
+  const end=new DataView(new ArrayBuffer(22));
+  end.setUint32(0,0x06054b50,true);end.setUint16(4,0,true);end.setUint16(6,0,true);
+  end.setUint16(8,files.length,true);end.setUint16(10,files.length,true);
+  end.setUint32(12,csz,true);end.setUint32(16,off,true);end.setUint16(20,0,true);
+  return new Blob([...parts,...cen,end.buffer],{type:mime});
+}
+function xesc(s){return String(s==null?'':s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function fn(b,ext){return (b.title||'taqta').replace(/[\\/:*?"<>|]+/g,'_').slice(0,60)+ext}
+function attLabel(a){
+  if(a.t==='link')return a.url;
+  return (a.t==='image'?'[сурет] ':a.t==='video'?'[видео] ':a.t==='audio'?'[аудио] ':'[файл] ')+(a.name||'');
+}
+function boardData(b){
+  return b.cols.map((c,i)=>({
+    title:c.title||('Бөлім '+(i+1)),
+    posts:c.posts.map(p=>({title:p.title||'',body:p.body||'',att:(p.att||[]).concat(p.img?[{t:'image',name:'сурет'}]:[]).map(attLabel)}))
+  }));
+}
+const XMLH='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+function wp(text,o){
+  o=o||{};
+  const runs=String(text).split(/\r?\n/).map((l,i)=>`<w:r><w:rPr>${o.b?'<w:b/>':''}${o.color?`<w:color w:val="${o.color}"/>`:''}<w:sz w:val="${o.sz||22}"/></w:rPr>${i?'<w:br/>':''}<w:t xml:space="preserve">${xesc(l)}</w:t></w:r>`).join('');
+  return `<w:p><w:pPr><w:spacing w:after="120"/></w:pPr>${runs}</w:p>`;
+}
+function exportDocx(){
+  const b=B();
+  let body=wp(b.title,{b:true,sz:40})+wp(b.author||'',{color:'666666',sz:20});
+  boardData(b).forEach(sec=>{
+    body+=wp(sec.title,{b:true,sz:30,color:'6D28D9'});
+    sec.posts.forEach(p=>{
+      if(p.title)body+=wp(p.title,{b:true,sz:26});
+      if(p.body)body+=wp(p.body);
+      p.att.forEach(a=>{body+=wp(a,{color:'555555',sz:20})});
+      body+=wp(' ');
+    });
+  });
+  const files=[
+   {name:'[Content_Types].xml',data:XMLH+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>'},
+   {name:'_rels/.rels',data:XMLH+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>'},
+   {name:'word/document.xml',data:XMLH+'<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'+body+'<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr></w:body></w:document>'}
+  ];
+  dlBlob(fn(b,'.docx'),makeZip(files,'application/vnd.openxmlformats-officedocument.wordprocessingml.document'));
+  toast('DOCX сақталды');
+}
+function exportXlsx(){
+  const b=B();
+  const rows=[['Бөлім','№','Тақырып','Мәтін','Қосымшалар / сілтемелер']];
+  boardData(b).forEach(sec=>sec.posts.forEach((p,i)=>rows.push([sec.title,i+1,p.title,p.body,p.att.join('\n')])));
+  const colL=i=>String.fromCharCode(65+i);
+  const sheet=rows.map((r,ri)=>'<row r="'+(ri+1)+'">'+r.map((v,ci)=>{
+    const ref=colL(ci)+(ri+1);
+    if(typeof v==='number')return `<c r="${ref}" s="1"><v>${v}</v></c>`;
+    return `<c r="${ref}" t="inlineStr" s="${ri===0?2:1}"><is><t xml:space="preserve">${xesc(String(v).slice(0,32000))}</t></is></c>`;
+  }).join('')+'</row>').join('');
+  const NS='http://schemas.openxmlformats.org/spreadsheetml/2006/main';
+  const files=[
+   {name:'[Content_Types].xml',data:XMLH+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>'},
+   {name:'_rels/.rels',data:XMLH+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'},
+   {name:'xl/workbook.xml',data:XMLH+'<workbook xmlns="'+NS+'" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Тақта" sheetId="1" r:id="rId1"/></sheets></workbook>'},
+   {name:'xl/_rels/workbook.xml.rels',data:XMLH+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'},
+   {name:'xl/styles.xml',data:XMLH+'<styleSheet xmlns="'+NS+'"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>'},
+   {name:'xl/worksheets/sheet1.xml',data:XMLH+'<worksheet xmlns="'+NS+'"><cols><col min="1" max="1" width="22" customWidth="1"/><col min="2" max="2" width="5" customWidth="1"/><col min="3" max="3" width="34" customWidth="1"/><col min="4" max="4" width="70" customWidth="1"/><col min="5" max="5" width="34" customWidth="1"/></cols><sheetData>'+sheet+'</sheetData></worksheet>'}
+  ];
+  dlBlob(fn(b,'.xlsx'),makeZip(files,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'));
+  toast('XLSX сақталды');
+}
+function printHTML(b){
+  const secs=b.cols.map((c,i)=>'<h2>'+esc(c.title||('Бөлім '+(i+1)))+'</h2>'+c.posts.map(p=>{
+    const att=(p.att||[]).concat(p.img?[{t:'image',src:p.img}]:[]);
+    return `<div class="pp" style="background:${p.color||'#fff'}">${p.title?`<h3>${esc(p.title)}</h3>`:''}${att.map(a=>a.t==='image'?`<img src="${a.src}">`:a.t==='link'?`<div>🔗 ${esc(a.url)}</div>`:`<div>📎 ${esc(a.name||a.t)}</div>`).join('')}<div class="pb">${esc(p.body)}</div></div>`;
+  }).join('')).join('');
+  return `<h1>${esc(b.title)}</h1><div class="pm">${esc(b.author||'')}</div>${secs}`;
+}
+function printBoard(){
+  const b=B(),pa=document.getElementById('printArea'),old=document.title;
+  pa.innerHTML=printHTML(b);document.title=b.title||'Padlet';
+  setTimeout(()=>{window.print();document.title=old},80);
+}
+function openShare(){
+  const b=B();
+  modalHost.innerHTML=`<div class="back"><div class="modal wide"><h2>🔗 Поделиться</h2>
+   <p class="hint">«${esc(b.title)}» тақтасын қалай бөліскіңіз келеді?</p>
+   <div class="shopts">
+    <button class="shopt" id="shoPdf"><b>📄 PDF</b><small>Басып шығару терезесі ашылады — «Принтер» орнына «Сохранить как PDF» таңдаңыз</small></button>
+    <button class="shopt" id="shoXlsx"><b>📊 XLSX</b><small>Excel кестесі: бөлім, тақырып, мәтін, сілтемелер</small></button>
+    <button class="shopt" id="shoDocx"><b>📝 DOCX</b><small>Word құжаты (суреттер қосылмайды, тек мәтін мен сілтеме)</small></button>
+    <button class="shopt" id="shoPrint"><b>🖨 Печать</b><small>Тақтаны принтерге шығару</small></button>
+    <button class="shopt" id="shoFile"><b>💾 Тақта файлы</b><small>.padlet.json — кейін қайта жүктеуге болады</small></button>
+    <button class="shopt" id="shoRoom"><b>🚪 Комнаты</b><small>Бөлмелерді бөлек файл етіп бөлісу</small></button>
+   </div>
+   <div class="row"><button class="btn pri" id="shoClose">Жабу</button></div></div></div>`;
+  const $=id=>document.getElementById(id);
+  $('shoPdf').onclick=()=>{modalHost.innerHTML='';toast('Принтер орнына «Сохранить как PDF» таңдаңыз');printBoard()};
+  $('shoPrint').onclick=()=>{modalHost.innerHTML='';printBoard()};
+  $('shoXlsx').onclick=exportXlsx;
+  $('shoDocx').onclick=exportDocx;
+  $('shoFile').onclick=()=>downloadBoard(b);
+  $('shoRoom').onclick=openRooms;
+  $('shoClose').onclick=()=>modalHost.innerHTML='';
+}
+
+/* ---------- rooms ---------- */
+function openRooms(){
+  const b=B();b.rooms=b.rooms||[];
+  modalHost.innerHTML=`<div class="back"><div class="modal wide"><h2>🚪 Комнаты</h2>
+   <p class="hint">Әр бөлмеге бөлек слайдтар (бөлімдер) беріңіз. Бөлме файлын қатысушыларға жіберсеңіз, олар өз слайдтарын бөлек көреді.</p>
+   <div id="roomList"></div>
+   <div class="row" style="justify-content:space-between"><button class="btn pri" id="rNew">＋ Бөлме қосу</button><button class="btn" id="rClose">Жабу</button></div></div></div>`;
+  const L=document.getElementById('roomList');
+  if(!b.rooms.length)L.innerHTML='<div class="empty">Әзірге бөлме жоқ. «＋ Бөлме қосу» батырмасын басыңыз.</div>';
+  b.rooms.forEach(r=>{
+    const slides=b.cols.filter(c=>r.sections.includes(c.id)&&c.posts.length);
+    const d=document.createElement('div');d.className='roomc';
+    d.innerHTML=`<div class="rh"><b>🚪 ${esc(r.name)}</b><span class="code">${esc(r.code)}</span></div>
+     <div class="hint" style="margin:6px 0 0">${slides.length} слайд · ${r.secs} с${r.loop?' · қайталау':''}${(r.members||[]).length?' · қатысушылар: '+esc(r.members.join(', ')):' · ашық (email керек емес)'}</div>
+     <div class="rb"><button class="btn mini pri" data-a="play">▶ Көру</button><button class="btn mini" data-a="edit">✏ Өзгерту</button><button class="btn mini" data-a="file">💾 Бөлме файлы</button><button class="btn mini" data-a="del">🗑</button></div>`;
+    d.querySelector('[data-a=play]').onclick=()=>{
+      if(!slides.length)return toast('Бөлмеде слайд жоқ');
+      modalHost.innerHTML='';startShow(r.secs,r.loop,{title:b.title+' — '+r.name,bg:b.bg,cols:slides});
+    };
+    d.querySelector('[data-a=edit]').onclick=()=>editRoom(r);
+    d.querySelector('[data-a=file]').onclick=()=>exportRoom(r);
+    d.querySelector('[data-a=del]').onclick=()=>{if(confirm('Бөлмені жоясыз ба?')){b.rooms=b.rooms.filter(x=>x!==r);touch();openRooms()}};
+    L.appendChild(d);
+  });
+  document.getElementById('rNew').onclick=()=>editRoom(null);
+  document.getElementById('rClose').onclick=()=>modalHost.innerHTML='';
+}
+function editRoom(room){
+  const b=B(),isNew=!room;
+  room=room||{id:uid(),name:'',code:Math.random().toString(36).slice(2,8).toUpperCase(),secs:S.secs||5,loop:true,sections:[],members:[]};
+  modalHost.innerHTML=`<div class="back"><div class="modal wide"><h2>${isNew?'Жаңа бөлме':'Бөлмені өзгерту'}</h2>
+   <input type="text" id="rName" placeholder="Бөлме атауы (мысалы: 1-топ)" value="${esc(room.name)}">
+   <div class="secrow"><span>Бір слайд:</span><input type="number" id="rSec" min="1" max="600" value="${room.secs}"><span>секунд</span></div>
+   <label class="chk"><input type="checkbox" id="rLoop" ${room.loop?'checked':''}> Қайталау (соңына жеткенде басына оралу)</label>
+   <div style="font-weight:700;margin:10px 0 4px">Бөлмеге кіретін слайдтар (бөлімдер):</div>
+   ${b.cols.map((c,i)=>`<label class="chk"><input type="checkbox" class="rSecChk" value="${c.id}" ${room.sections.includes(c.id)?'checked':''}> ${esc(c.title||('Бөлім '+(i+1)))} <small style="color:#999">(${c.posts.length} пост)</small></label>`).join('')}
+   <div style="font-weight:700;margin:12px 0 4px">Қатысушылар (email, үтірмен). Бос қалса — кез келген адам көре алады:</div>
+   <textarea id="rMem" style="min-height:60px" placeholder="a@gmail.com, b@mail.ru">${esc((room.members||[]).join(', '))}</textarea>
+   <div class="row"><button class="btn" id="rCancel">Бас тарту</button><button class="btn pri" id="rSave">Сақтау</button></div></div></div>`;
+  document.getElementById('rCancel').onclick=openRooms;
+  document.getElementById('rSave').onclick=()=>{
+    const name=document.getElementById('rName').value.trim();
+    if(!name)return toast('Бөлме атауын жазыңыз');
+    const secs=[...document.querySelectorAll('.rSecChk:checked')].map(x=>x.value);
+    if(!secs.length)return toast('Кемінде бір слайд таңдаңыз');
+    room.name=name;room.sections=secs;
+    room.secs=Math.max(1,Math.min(600,parseInt(document.getElementById('rSec').value)||5));
+    room.loop=document.getElementById('rLoop').checked;
+    room.members=document.getElementById('rMem').value.split(/[\s,;]+/).map(x=>x.trim().toLowerCase()).filter(Boolean);
+    if(isNew)b.rooms.push(room);
+    touch();openRooms();
+  };
+}
+function exportRoom(room){
+  const b=B();
+  const cols=b.cols.filter(c=>room.sections.includes(c.id)&&c.posts.length).map(c=>({id:c.id,title:c.title,posts:c.posts}));
+  if(!cols.length)return toast('Бөлмеде слайд жоқ');
+  dl((b.title+' - '+room.name).replace(/[\\/:*?"<>|]+/g,'_').slice(0,70)+'.padletroom.json',
+    {padletRoom:1,room:{id:room.id,name:room.name,code:room.code,secs:room.secs,loop:room.loop,members:room.members||[]},board:{title:b.title,bg:b.bg,author:b.author},cols});
+  toast('Бөлме файлы сақталды');
+}
+function importRoom(j){
+  if(!j.room||!Array.isArray(j.cols))throw 0;
+  const r=j.room;S.joined=(S.joined||[]).filter(x=>!(x.room.id===r.id&&x.room.code===r.code));
+  S.joined.push({room:r,board:j.board||{},cols:j.cols});
+}
+function roomAllowed(r){
+  if(!r.members||!r.members.length)return true;
+  const u=curUser();return !!u&&r.members.includes(u.email.toLowerCase());
+}
+function openMyRooms(){
+  const u=curUser(),L=S.joined||[];
+  modalHost.innerHTML=`<div class="back"><div class="modal wide"><h2>🚪 Мои комнаты</h2>
+   <p class="hint">${u?'Сіз '+esc(u.email)+' ретінде кірдіңіз.':'Қатысушылар тізімі бар бөлмелерді ашу үшін аккаунтқа кіріңіз.'} Бөлме файлын (.padletroom.json) ашсаңыз, бөлме осы жерде пайда болады.</p>
+   <div id="myRL"></div>
+   <div class="row" style="justify-content:space-between"><button class="btn pri" id="mrOpen">📂 Бөлме файлын ашу</button><button class="btn" id="mrClose">Жабу</button></div></div></div>`;
+  const box=document.getElementById('myRL');
+  if(!L.length)box.innerHTML='<div class="empty">Әзірге бөлме жоқ. Мұғалім жіберген .padletroom.json файлын ашыңыз.</div>';
+  L.forEach(x=>{
+    const r=x.room,ok=roomAllowed(r),n=x.cols.filter(c=>c.posts&&c.posts.length).length;
+    const d=document.createElement('div');d.className='roomc';
+    d.innerHTML=`<div class="rh"><b>🚪 ${esc(r.name)}</b><span class="code">${esc(r.code)}</span></div>
+     <div class="hint" style="margin:6px 0 0">${esc(x.board.title||'')} · ${n} слайд · ${r.secs} с${ok?'':' · 🔒 тек тізімдегі email-дер үшін'}</div>
+     <div class="rb">${ok?'<button class="btn mini pri" data-a="play">▶ Көру</button>':'<button class="btn mini" data-a="login">🔒 Кіру</button>'}<button class="btn mini" data-a="del">🗑</button></div>`;
+    const pl=d.querySelector('[data-a=play]');
+    if(pl)pl.onclick=()=>{modalHost.innerHTML='';startShow(r.secs,r.loop,{title:(x.board.title||'')+' — '+r.name,bg:x.board.bg||GRADS[0],cols:x.cols})};
+    const lg=d.querySelector('[data-a=login]');
+    if(lg)lg.onclick=()=>openAccount('login');
+    d.querySelector('[data-a=del]').onclick=()=>{S.joined=S.joined.filter(y=>y!==x);save();openMyRooms()};
+    box.appendChild(d);
+  });
+  document.getElementById('mrOpen').onclick=()=>document.getElementById('fileIn').click();
+  document.getElementById('mrClose').onclick=()=>modalHost.innerHTML='';
+}
+
+
+/* ---------- save / load files ---------- */
+function fname(b){return (b.title||'taqta').replace(/[\\/:*?"<>|]+/g,'_').slice(0,60)+'.padlet.json'}
+function dl(name,obj){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(obj,null,2)],{type:'application/json'}));
+  a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+}
+function downloadBoard(b){dl(fname(b),{padletBoard:1,board:b});toast('Файл сақталды: '+fname(b))}
+function saveBoardFile(){downloadBoard(B())}
+function exportAll(){dl('padlet-barlyq-taqtalar.json',{padletAll:1,boards:S.boards.filter(b=>!b.trashed)});toast('Барлық тақталар сақталды')}
+fileIn.onchange=async()=>{
+  let n=0,rooms=0;
+  for(const f of fileIn.files){
+    try{
+      const j=JSON.parse(await f.text());
+      if(j.padletRoom){importRoom(j);rooms++;continue}
+      const arr=j.padletAll?j.boards:j.padletBoard?[j.board]:null;
+      if(!arr)throw 0;
+      arr.forEach(b=>{if(!b.cols)return;if(S.boards.some(x=>x.id===b.id))b.id=uid();b.trashed=false;const cu=curUser();if(cu)b.owner=cu.id;else delete b.owner;b.updated=Date.now();S.boards.push(b);n++});
+    }catch(e){toast('«'+f.name+'» — дұрыс файл емес')}
+  }
+  fileIn.value='';
+  if(n){save();toast(n+' тақта жүктелді');if(cur)goHome();else renderDash()}
+  if(rooms){save();toast(rooms+' бөлме қосылды');openMyRooms()}
+};
+
+/* ---------- init ---------- */
+load();S.joined=S.joined||[];
+if(!S.boards.length){
+  S.boards.push({id:uid(),title:'Химия 8',author:'Айдар Шайхимов',bg:GRADS[0],created:Date.now(),updated:Date.now(),
+    cols:[{id:uid(),title:'',posts:[
+      {id:uid(),title:'Функционалдық тапсырмалар',body:'Функционалдық сауаттылыққа арналған тапсырма',color:'#ffffff'},
+      {id:uid(),title:'2. Сіздің отбасыңызда тұзды қандай ауруларды емдеу үшін қолданады?',body:'',color:'#ffffff'}]}]});
+  save();
+}
+refreshUser();renderDash();
+</script>
+</body>
+</html>
