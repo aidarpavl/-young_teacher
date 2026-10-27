@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Сабақ жоспарын құрастырушы</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #2d3748;
+  }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
+  }
+  header {
+    background: linear-gradient(135deg, #4c51bf, #805ad5);
+    color: #fff;
+    padding: 30px;
+    text-align: center;
+  }
+  header h1 { font-size: 26px; margin-bottom: 8px; }
+  header p { opacity: 0.9; font-size: 14px; }
+
+  .school-input {
+    padding: 20px 30px;
+    background: #f7fafc;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .school-input label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #4a5568;
+  }
+  .school-input input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: border 0.2s;
+  }
+  .school-input input:focus {
+    outline: none;
+    border-color: #805ad5;
+  }
+
+  .content { padding: 30px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 25px;
+  }
+  @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: #f7fafc;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+  }
+  .panel h3 {
+    font-size: 15px;
+    color: #4a5568;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 15px;
+    background: #fff;
+    cursor: pointer;
+    transition: border 0.2s;
+  }
+  select:focus { outline: none; border-color: #805ad5; }
+
+  .topic-list {
+    max-height: 320px;
+    overflow-y: auto;
+    margin-top: 10px;
+  }
+  .topic-item {
+    padding: 10px 14px;
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  .topic-item:hover {
+    border-color: #805ad5;
+    background: #faf5ff;
+  }
+  .topic-item.active {
+    border-color: #805ad5;
+    background: #805ad5;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 14px 32px;
+    background: linear-gradient(135deg, #4c51bf, #805ad5);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 14px rgba(128,90,213,0.4);
+  }
+  .btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(128,90,213,0.6);
+  }
+  .btn:disabled {
+    background: #cbd5e0;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+  .btn-secondary {
+    background: linear-gradient(135deg, #38a169, #48bb78);
+    box-shadow: 0 4px 14px rgba(72,187,120,0.4);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    box-shadow: 0 6px 20px rgba(72,187,120,0.6);
+  }
+
+  .actions {
+    text-align: center;
+    margin: 25px 0;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* Сабақ жоспары */
+  #lessonPlan {
+    display: none;
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 25px;
+    margin-top: 20px;
+  }
+  #lessonPlan h2 {
+    color: #4c51bf;
+    font-size: 22px;
+    margin-bottom: 6px;
+  }
+  .plan-meta {
+    color: #718096;
+    font-size: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px dashed #e2e8f0;
+  }
+  .plan-section {
+    margin-bottom: 20px;
+  }
+  .plan-section h4 {
+    color: #4c51bf;
+    font-size: 16px;
+    margin-bottom: 10px;
+    padding-left: 10px;
+    border-left: 4px solid #805ad5;
+  }
+  .plan-section ul, .plan-section ol { padding-left: 24px; }
+  .plan-section li { margin-bottom: 6px; line-height: 1.5; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 14px;
+  }
+  th, td {
+    border: 1px solid #e2e8f0;
+    padding: 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #f7fafc;
+    color: #4a5568;
+    font-weight: 600;
+  }
+  tr:nth-child(even) td { background: #fafafa; }
+
+  /* Қиындықтар бөлімі */
+  .difficulty-section {
+    display: none;
+    background: #fffaf0;
+    border: 2px solid #f6ad55;
+    border-radius: 12px;
+    padding: 25px;
+    margin-top: 20px;
+  }
+  .difficulty-section h3 {
+    color: #c05621;
+    margin-bottom: 10px;
+  }
+  .difficulty-section p {
+    color: #744210;
+    font-size: 14px;
+    margin-bottom: 15px;
+  }
+  .difficulty-list label {
+    display: block;
+    padding: 10px 14px;
+    background: #fff;
+    border: 2px solid #fbd38d;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+  }
+  .difficulty-list label:hover {
+    border-color: #ed8936;
+    background: #fffaf0;
+  }
+  .difficulty-list input[type="checkbox"] {
+    margin-right: 10px;
+    transform: scale(1.2);
+  }
+
+  .supplement-section {
+    display: none;
+    background: #f0fff4;
+    border: 2px solid #68d391;
+    border-radius: 12px;
+    padding: 25px;
+    margin-top: 20px;
+  }
+  .supplement-section h3 {
+    color: #276749;
+    margin-bottom: 12px;
+  }
+  .supplement-section .task {
+    background: #fff;
+    border-left: 4px solid #48bb78;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .supplement-section .task strong {
+    color: #276749;
+    display: block;
+    margin-bottom: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>📚 Сабақ жоспарын құрастырушы</h1>
+    <p>130 бұйрыққа сәйкес күнтізбелік-тақырыптық жоспар негізінде</p>
+  </header>
+
+  <!-- Мектеп аты -->
+  <div class="school-input">
+    <label for="schoolName">🏫 Мектептің атауы:</label>
+    <input type="text" id="schoolName" placeholder="Жас дарын" />
+  </div>
+
+  <div class="content">
+    <div class="grid">
+      <!-- Пәндер -->
+      <div class="panel">
+        <h3>📖 Пәндер тізімі</h3>
+        <select id="subjectSelect" size="8" style="height:auto;">
+          <!-- JS арқылы толтырылады -->
+        </select>
+      </div>
+
+      <!-- Тақырыптар -->
+      <div class="panel">
+        <h3>📝 Күнтізбелік-тақырыптық жоспар</h3>
+        <div class="topic-list" id="topicList">
+          <p style="color:#a0aec0; font-size:14px; text-align:center; padding:20px;">
+            Алдымен пәнді таңдаңыз
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="generateBtn" disabled>🎯 Сабақ жоспарын құру</button>
+      <button class="btn btn-secondary" id="printBtn" style="display:none;">🖨️ Басып шығару</button>
+    </div>
+
+    <!-- Сабақ жоспары -->
+    <div id="lessonPlan"></div>
+
+    <!-- Қиындықтар -->
+    <div class="difficulty-section" id="difficultySection">
+      <h3>⚠️ Сабақ барысында қиындық туындады ма?</h3>
+      <p>Қиын болған кезеңдерді белгілеңіз — келесі сабақ жоспарына қосымша тапсырмалар қосылады.</p>
+      <div class="difficulty-list" id="difficultyList"></div>
+      <div class="actions">
+        <button class="btn btn-secondary" id="nextLessonBtn">➡️ Келесі сабақ жоспарын құру</button>
+      </div>
+    </div>
+
+    <!-- Қосымша тапсырмалар -->
+    <div class="supplement-section" id="supplementSection">
+      <h3>✅ Қосымша тапсырмалар (өткен тақырып бойынша)</h3>
+      <div id="supplementTasks"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================
+   ДЕРЕКТЕР: Пәндер және күнтізбелік-тақырыптық жоспар
+   Мұғалім осы жерді өз мектебінің жоспарына сай өзгертеді
+   ===================================================== */
+const curriculum = {
+  "Қазақ тілі": [
+    "Мәтін және оның түрлері",
+    "Сөз құрамы. Түбір және қосымша",
+    "Зат есім. Жалпы және жалқы есім",
+    "Сын есімнің мағыналық түрлері",
+    "Етістік. Шақ категориясы",
+    "Сөйлем мүшелері. Бастауыш пен баяндауыш",
+    "Мәтінмен жұмыс: негізгі ойды анықтау"
+  ],
+  "Математика": [
+    "Натурал сандарды қосу және азайту",
+    "Көбейту және бөлу амалдары",
+    "Жай бөлшектер. Бөлшектерді салыстыру",
+    "Ондық бөлшектермен амалдар",
+    "Теңдеулерді шешу",
+    "Пайыз есептері",
+    "Геометриялық фигуралардың ауданы мен периметрі"
+  ],
+  "Физика": [
+    "Заттың құрылысы. Молекулалар",
+    "Механикалық қозғалыс",
+    "Күш және оның түрлері",
+    "Қысым. Паскаль заңы",
+    "Жұмыс және қуат",
+    "Жарық құбылыстары",
+    "Жылулық құбылыстар"
+  ],
+  "Информатика": [
+    "Эргономика дегеніміз не",
+    "Біздің айналамыздағы ақпарат",
+    "Интернетте ақпаратты іздеу",
+    "Интернетте ақпаратты іздеу. Практикалық жұмыс ",
+    "Есептеу техникасының даму тарихы ",
+    "Есептеу техникасының даму тарихы. Практикалық жұмыс",
+    "Программалық жасақтама және жасанды интеллект. БЖБ №1"
+  ],
+  "Тарих": [
+    "Ежелгі Қазақстан тайпалары",
+    "Қазақ хандығының құрылуы",
+    "Абылай хан тұсындағы Қазақстан",
+    "ХІХ ғасырдағы ұлт-азаттық қозғалыстар",
+    "Алаш қозғалысы",
+    "Қазақстан Тәуелсіздігі",
+    "Тәуелсіз Қазақстанның дамуы"
+  ],
+  "Биология": [
+    "Жасуша құрылысы",
+    "Өсімдіктер әлемі",
+    "Жануарлар әлемі",
+    "Адам анатомиясы. Тірек-қимыл жүйесі",
+    "Қан айналым жүйесі",
+    "Тыныс алу жүйесі",
+    "Экология және қоршаған орта"
+  ]
+};
+
+/* =====================================================
+   Күй айнымалылары
+   ===================================================== */
+let currentSubject = null;
+let currentTopic = null;
+let currentTopicIndex = null;
+let previousDifficulties = []; // өткен сабақтағы қиындықтар
+
+/* =====================================================
+   Пәндер тізімін толтыру
+   ===================================================== */
+const subjectSelect = document.getElementById('subjectSelect');
+Object.keys(curriculum).forEach(subject => {
+  const opt = document.createElement('option');
+  opt.value = subject;
+  opt.textContent = subject;
+  subjectSelect.appendChild(opt);
+});
+
+/* =====================================================
+   Пән таңдалғанда тақырыптарды шығару
+   ===================================================== */
+subjectSelect.addEventListener('change', () => {
+  currentSubject = subjectSelect.value;
+  currentTopic = null;
+  currentTopicIndex = null;
+  renderTopics();
+  document.getElementById('generateBtn').disabled = true;
+  document.getElementById('lessonPlan').style.display = 'none';
+  document.getElementById('difficultySection').style.display = 'none';
+  document.getElementById('supplementSection').style.display = 'none';
+  document.getElementById('printBtn').style.display = 'none';
+});
+
+function renderTopics() {
+  const list = document.getElementById('topicList');
+  list.innerHTML = '';
+  if (!currentSubject) return;
+
+  curriculum[currentSubject].forEach((topic, idx) => {
+    const div = document.createElement('div');
+    div.className = 'topic-item';
+    div.textContent = `${idx + 1}. ${topic}`;
+    div.addEventListener('click', () => {
+      document.querySelectorAll('.topic-item').forEach(el => el.classList.remove('active'));
+      div.classList.add('active');
+      currentTopic = topic;
+      currentTopicIndex = idx;
+      document.getElementById('generateBtn').disabled = false;
+    });
+    list.appendChild(div);
+  });
+}
+
+/* =====================================================
+   Сабақ жоспарын құру (130 бұйрыққа сәйкес)
+   ===================================================== */
+document.getElementById('generateBtn').addEventListener('click', () => {
+  if (!currentTopic) return;
+  renderLessonPlan(false);
+});
+
+function renderLessonPlan(isNext) {
+  const school = document.getElementById('schoolName').value.trim() || '____________ мектеп';
+  const plan = document.getElementById('lessonPlan');
+
+  // Қосымша тапсырмаларды дайындау (өткен қиындықтар бойынша)
+  let supplementBlock = '';
+  if (isNext && previousDifficulties.length > 0) {
+    supplementBlock = `
+      <div class="plan-section" style="background:#f0fff4; padding:15px; border-radius:8px; border-left:4px solid #48bb78;">
+        <h4 style="color:#276749; border-color:#48bb78;">🔁 Өткен тақырып бойынша қосымша жұмыс</h4>
+        <p style="font-size:14px; margin-bottom:10px;">
+          Өткен сабақта қиындық туындаған кезеңдер: <strong>${previousDifficulties.join(', ')}</strong>
+        </p>
+        <ul>
+          ${previousDifficulties.map(d => `<li><strong>${d}</strong> — осы кезеңге арналған қосымша тапсырма мен жаттығу қосылды.</li>`).join('')}
+        </ul>
+      </div>
+    `;
+  }
+
+  plan.innerHTML = `
+    <h2>Сабақ жоспары</h2>
+    <div class="plan-meta">
+      <strong>Мектеп:</strong> ${school}<br>
+      <strong>Пән:</strong> ${currentSubject}<br>
+      <strong>Тақырып:</strong> ${currentTopic}<br>
+      <strong>Сынып:</strong> ____ &nbsp;|&nbsp; <strong>Күні:</strong> ${new Date().toLocaleDateString('kk-KZ')}<br>
+      <strong>Ұзақтығы:</strong> 45 минут &nbsp;|&nbsp; <strong>Негіздеме:</strong> ҚР БҒМ №130 бұйрығы
+    </div>
+
+    ${supplementBlock}
+
+    <div class="plan-section">
+      <h4>1. Сабақтың мақсаты</h4>
+      <ul>
+        <li><strong>Оқыту мақсаты:</strong> «${currentTopic}» тақырыбы бойынша білімді меңгерту.</li>
+        <li><strong>Дамыту мақсаты:</strong> Ойлау, талдау, салыстыру дағдыларын дамыту.</li>
+        <li><strong>Тәрбие мақсаты:</strong> Жауапкершілікке, ұжымдық жұмысқа тәрбиелеу.</li>
+      </ul>
+    </div>
+
+    <div class="plan-section">
+      <h4>2. Күтілетін нәтижелер</h4>
+      <ul>
+        <li><strong>Білу:</strong> Тақырыптың негізгі ұғымдарын білу.</li>
+        <li><strong>Түсіну:</strong> Негізгі заңдылықтарды түсіндіре алу.</li>
+        <li><strong>Қолдану:</strong> Алған білімді практикалық тапсырмаларда қолдану.</li>
+        <li><strong>Талдау:</strong> Мысалдарды талдап, қорытынды жасай алу.</li>
+      </ul>
+    </div>
+
+    <div class="plan-section">
+      <h4>3. Сабақ барысы</h4>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:22%;">Кезең</th>
+            <th style="width:8%;">Уақыт</th>
+            <th style="width:35%;">Мұғалім әрекеті</th>
+            <th style="width:35%;">Оқушы әрекеті</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Ұйымдастыру кезеңі</td>
+            <td>2 мин</td>
+            <td>Сәлемдесу, түгендеу, психологиялық ахуал қалыптастыру.</td>
+            <td>Сәлемдесу, сабаққа дайындалу.</td>
+          </tr>
+          <tr>
+            <td>Үй тапсырмасын тексеру</td>
+            <td>5 мин</td>
+            <td>Үй тапсырмасын сұрау, қателерді түзету.</td>
+            <td>Жауап беру, сұрақ қою.</td>
+          </tr>
+          <tr>
+            <td>Өткенді қайталау</td>
+            <td>5 мин</td>
+            <td>«Миға шабуыл» әдісі арқылы өткен тақырыпты еске түсіру.</td>
+            <td>Сұрақтарға жауап беру, пікір білдіру.</td>
+          </tr>
+          <tr>
+            <td>Жаңа тақырыпты түсіндіру</td>
+            <td>15 мин</td>
+            <td>«${currentTopic}» тақырыбын түсіндіру, мысалдар келтіру, көрнекіліктер қолдану.</td>
+            <td>Тыңдау, конспектілеу, сұрақ қою.</td>
+          </tr>
+          <tr>
+            <td>Практикалық жұмыс</td>
+            <td>10 мин</td>
+            <td>Жұптық/топтық тапсырмалар беру, бақылау, көмектесу.</td>
+            <td>Тапсырмаларды орындау, талқылау.</td>
+          </tr>
+          <tr>
+            <td>Бекіту</td>
+            <td>5 мин</td>
+            <td>Сұрақ-жауап, тест немесе қысқа тапсырма.</td>
+            <td>Жауап беру, өзін-өзі бағалау.</td>
+          </tr>
+          <tr>
+            <td>Рефлексия</td>
+            <td>2 мин</td>
+            <td>«Бүгін мен білдім...» әдісі.</td>
+            <td>Ойларын білдіру.</td>
+          </tr>
+          <tr>
+            <td>Үй тапсырмасы</td>
+            <td>1 мин</td>
+            <td>Үй тапсырмасын түсіндіру.</td>
+            <td>Жазып алу.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="plan-section">
+      <h4>4. Бағалау критерийлері</h4>
+      <ul>
+        <li>Тақырыпты түсіну деңгейі</li>
+        <li>Практикалық тапсырманы орындау дәлдігі</li>
+        <li>Белсенділік және қатысу</li>
+      </ul>
+    </div>
+
+    <div class="plan-section">
+      <h4>5. Көрнекіліктер мен жабдықтар</h4>
+      <ul>
+        <li>Оқулық, жұмыс дәптері</li>
+        <li>Интерактивті тақта / проектор</li>
+        <li>Дидактикалық материалдар</li>
+      </ul>
+    </div>
+  `;
+
+  plan.style.display = 'block';
+  document.getElementById('printBtn').style.display = 'inline-block';
+  renderDifficulties();
+
+  // Прокрутка
+  plan.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* =====================================================
+   Қиындық кезеңдерін көрсету
+   ===================================================== */
+function renderDifficulties() {
+  const stages = [
+    "Үй тапсырмасын тексеру",
+    "Өткенді қайталау",
+    "Жаңа тақырыпты түсіндіру",
+    "Практикалық жұмыс",
+    "Бекіту",
+    "Рефлексия"
+  ];
+
+  const list = document.getElementById('difficultyList');
+  list.innerHTML = '';
+  stages.forEach(stage => {
+    const label = document.createElement('label');
+    label.innerHTML = `<input type="checkbox" value="${stage}"> ${stage}`;
+    list.appendChild(label);
+  });
+
+  document.getElementById('difficultySection').style.display = 'block';
+}
+
+/* =====================================================
+   Келесі сабақ жоспарын құру (қосымша тапсырмалармен)
+   ===================================================== */
+document.getElementById('nextLessonBtn').addEventListener('click', () => {
+  // Таңдалған қиындықтарды жинау
+  const checked = Array.from(document.querySelectorAll('#difficultyList input:checked'))
+    .map(cb => cb.value);
+
+  previousDifficulties = checked;
+
+  // Келесі тақырыпқа өту
+  if (currentSubject && currentTopicIndex !== null) {
+    const topics = curriculum[currentSubject];
+    const nextIndex = currentTopicIndex + 1;
+
+    if (nextIndex >= topics.length) {
+      alert('🎉 Бұл пән бойынша барлық тақырыптар аяқталды!');
+      return;
+    }
+
+    currentTopicIndex = nextIndex;
+    currentTopic = topics[nextIndex];
+
+    // Тізімде белсенді етіп белгілеу
+    document.querySelectorAll('.topic-item').forEach((el, i) => {
+      el.classList.toggle('active', i === nextIndex);
+    });
+
+    // Қосымша тапсырмаларды көрсету
+    renderSupplementTasks(checked);
+
+    // Жаңа сабақ жоспарын құру
+    renderLessonPlan(true);
+
+    // Қиындық бөлімін жасыру
+    document.getElementById('difficultySection').style.display = 'none';
+  }
+});
+
+/* =====================================================
+   Қосымша тапсырмаларды көрсету
+   ===================================================== */
+function renderSupplementTasks(difficulties) {
+  const section = document.getElementById('supplementSection');
+  const container = document.getElementById('supplementTasks');
+  container.innerHTML = '';
+
+  if (difficulties.length === 0) {
+    container.innerHTML = '<p style="font-size:14px; color:#4a5568;">Қиындық белгіленбеді. Қосымша тапсырмалар қажет емес.</p>';
+  } else {
+    difficulties.forEach(d => {
+      const div = document.createElement('div');
+      div.className = 'task';
+      div.innerHTML = `
+        <strong>${d}</strong>
+        Осы кезеңге байланысты қосымша жаттығу: оқушыларға жеке-жеке немесе топпен орындауға арналған тапсырма беріледі. 
+        Мысалы: сұрақ-жауап карточкалары, салыстыру кестесі, шағын тест немесе практикалық жаттығу.
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  section.style.display = 'block';
+  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* =====================================================
+   Басып шығару
+   ===================================================== */
+document.getElementById('printBtn').addEventListener('click', () => {
+  window.print();
+});
+</script>
+</body>
+</html>

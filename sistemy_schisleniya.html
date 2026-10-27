@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Системы счисления</title>
+<style>
+:root{
+  --bg:#f3f6fc; --card:#ffffff; --ink:#0f1b3a; --muted:#5a6788; --line:#dde4f2;
+  --brand:#3b5bdb; --brand-d:#2f49b3; --brand-soft:#e7ecff;
+  --ok:#0f9d6b; --ok-soft:#dcf7ec; --bad:#d6336c; --bad-soft:#fde4ee; --warn:#e8590c;
+  --navy:#0c1633; --navy2:#1a2c6b;
+  --mono:ui-monospace,"Cascadia Mono","SF Mono",Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+a{color:inherit}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+
+/* ---------- header ---------- */
+header.top{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:18px;height:62px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;text-decoration:none;font-size:17px;white-space:nowrap}
+.logo i{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--navy);color:#7ee0c3;font:700 14px var(--mono);font-style:normal}
+nav.menu{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+nav.menu a{padding:8px 12px;border-radius:9px;text-decoration:none;font-weight:600;font-size:15px;color:var(--muted)}
+nav.menu a:hover{background:var(--brand-soft);color:var(--brand)}
+.lang{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.lang button{border:0;background:transparent;padding:7px 11px;font-weight:700;font-size:13px;color:var(--muted)}
+.lang button[aria-pressed="true"]{background:var(--brand);color:#fff}
+
+/* ---------- hero ---------- */
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:84px 0 92px}
+.hero .bits{position:absolute;inset:0;pointer-events:none}
+.hero .bits span{position:absolute;font:700 22px var(--mono);color:rgba(126,224,195,.16);animation:drift linear infinite}
+@keyframes drift{from{transform:translateY(0)}to{transform:translateY(-40px)}}
+.hero .wrap{position:relative}
+.tagline{display:inline-block;padding:6px 14px;border-radius:99px;background:rgba(255,255,255,.1);font-weight:600;font-size:14px;margin-bottom:18px}
+.hero h1{margin:0 0 16px;font-size:clamp(30px,5vw,50px);line-height:1.12;max-width:760px}
+.hero p{margin:0 0 28px;max-width:620px;font-size:18px;color:#cbd5f5}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.btn{border:0;border-radius:12px;padding:12px 22px;font-weight:700;background:var(--brand);color:#fff;text-decoration:none;display:inline-block;transition:background .15s,transform .05s}
+.btn:hover{background:var(--brand-d)}
+.btn:active{transform:translateY(1px)}
+.btn.light{background:#fff;color:var(--navy)}
+.btn.light:hover{background:#e9eefc}
+.btn.ghost{background:var(--brand-soft);color:var(--brand)}
+.btn.ghost:hover{background:#d8e0ff}
+.btn.small{padding:8px 14px;font-size:14px;border-radius:10px}
+.bases{display:flex;gap:10px;margin-top:34px;flex-wrap:wrap}
+.bases b{font:700 15px var(--mono);padding:6px 12px;border-radius:9px;border:1px solid rgba(255,255,255,.25);color:#7ee0c3}
+
+/* ---------- sections ---------- */
+section.sec{padding:64px 0 8px;scroll-margin-top:62px}
+.sec h2{margin:0 0 8px;font-size:clamp(24px,3.4vw,32px)}
+.sec>.wrap>p.lead{margin:0 0 26px;color:var(--muted);max-width:720px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 2px 10px rgba(15,27,58,.04)}
+.why{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.why .card h3{margin:10px 0 6px;font-size:17px}
+.why .card p{margin:0;color:var(--muted);font-size:15px}
+.ico{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:var(--brand-soft);color:var(--brand);font:800 17px var(--mono)}
+
+/* forms */
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+input[type=text],select{height:46px;border:1.5px solid var(--line);border-radius:12px;padding:0 14px;background:#fff;outline:none;min-width:0}
+input[type=text]{font-family:var(--mono);font-size:18px}
+input:focus,select:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(59,91,219,.15)}
+.grow{flex:1 1 220px}
+.swap{height:46px;width:46px;border:1.5px solid var(--line);background:#fff;border-radius:12px;font-size:20px;color:var(--brand)}
+.swap:hover{background:var(--brand-soft)}
+.msg{min-height:22px;margin:12px 0 0;font-size:14px;color:var(--muted)}
+.msg.err{color:var(--bad);font-weight:600}
+
+.result{margin-top:18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:18px 20px;border-radius:14px;background:var(--navy);color:#fff}
+.result small{display:block;color:#9fb0e6;font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:12px}
+.result output{display:block;font:700 clamp(20px,3.4vw,30px) var(--mono);color:#7ee0c3;word-break:break-all}
+.result .btn{margin-left:auto}
+.minis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:14px}
+.mini{border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:#fafbff}
+.mini span{display:block;font-size:12px;color:var(--muted);font-weight:700}
+.mini b{font:700 16px var(--mono);word-break:break-all}
+h3.sh{margin:26px 0 10px;font-size:18px}
+
+/* step tables */
+.scroll{overflow:auto;max-height:380px;border:1px solid var(--line);border-radius:12px}
+table.tbl{border-collapse:collapse;width:100%;font-size:15px}
+table.tbl th,table.tbl td{padding:8px 12px;text-align:center;border-bottom:1px solid var(--line);font-family:var(--mono)}
+table.tbl th{background:#f0f3fc;font-family:system-ui;font-size:13px;color:var(--muted);position:sticky;top:0}
+table.tbl td.yes{color:var(--ok);font-weight:700}
+table.tbl td.no{color:var(--muted)}
+.eq{font:600 16px var(--mono);background:#f6f8ff;border:1px dashed #c6d1f5;border-radius:12px;padding:12px 14px;overflow-x:auto;margin:8px 0;word-break:break-word}
+.eq b{color:var(--brand)}
+.pairs{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.pair{display:flex;flex-direction:column;align-items:center;border:1px solid var(--line);border-radius:10px;padding:6px 12px;background:#fff;font-family:var(--mono)}
+.pair span{color:var(--muted);font-size:15px}
+.pair b{color:var(--brand);font-size:20px}
+.note{color:var(--muted);font-size:15px;margin:10px 0}
+
+/* tabs */
+.tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+.tabs button{border:1.5px solid var(--line);background:#fff;border-radius:11px;padding:9px 18px;font-weight:700;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+.rule{background:var(--brand-soft);color:#233a9c;border-radius:12px;padding:10px 14px;font-size:15px;margin:0 0 16px}
+
+/* column grid */
+.gridbox{overflow-x:auto;padding:6px 2px 10px}
+table.grid{border-collapse:collapse;font-family:var(--mono);font-size:22px}
+table.grid td{width:30px;height:38px;text-align:center;padding:0}
+table.grid th{font:600 14px system-ui;color:var(--muted);text-align:right;padding:0 12px 0 0;white-space:nowrap}
+table.grid td.carry{color:var(--warn);font-size:15px;font-weight:700;vertical-align:bottom;height:22px}
+table.grid tr.sep td{border-top:2.5px solid var(--ink)}
+table.grid td.res{color:var(--brand);font-weight:800}
+table.grid td.shift,table.grid tr.zero td{color:#a9b4d3}
+ol.st{margin:8px 0;padding-left:22px;font-size:15px}
+ol.st li{margin:5px 0}
+ol.st code,.msg code{font-family:var(--mono);background:#eef1fb;padding:1px 6px;border-radius:6px}
+.check{display:inline-block;background:var(--ok-soft);color:#0a6b49;border-radius:10px;padding:8px 14px;font:600 15px var(--mono);margin-top:12px}
+
+/* cases */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.chips button{border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:7px 16px;font-weight:600;font-size:14px;color:var(--muted)}
+.chips button[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+.cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px}
+.case h3{margin:8px 0 6px;font-size:18px}
+.case .task{font-weight:600;margin:0 0 12px}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 10px;border-radius:99px;background:var(--brand-soft);color:var(--brand);margin-right:6px}
+.tag-audit{background:var(--bad-soft);color:var(--bad)}
+.sol{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.sol ol{margin:0;padding-left:20px;font-size:15px}
+.sol li{margin:4px 0}
+.ans{margin:10px 0 0}
+.ans b{color:var(--ok)}
+.hint{font-size:14px;color:var(--muted);margin:0 0 8px}
+ol.aud{list-style:none;margin:0;padding:0;counter-reset:s}
+ol.aud li{counter-increment:s;margin:6px 0}
+button.step{width:100%;text-align:left;border:1.5px solid var(--line);background:#fafbff;border-radius:11px;padding:9px 12px 9px 40px;position:relative;font-size:15px}
+button.step::before{content:counter(s);position:absolute;left:10px;top:8px;width:22px;height:22px;border-radius:50%;background:var(--brand-soft);color:var(--brand);font:700 12px/22px var(--mono);text-align:center}
+button.step:hover{border-color:var(--brand)}
+button.step.bad{background:var(--bad-soft);border-color:#f3a7c2;color:#8a1f45}
+button.step.ok{background:var(--ok-soft);border-color:#7fd8b5;color:#0a6b49}
+.fb{margin-top:10px;font-size:15px}
+.fb .good{color:#0a6b49;font-weight:700}
+.fb .oops{color:var(--bad);font-weight:700}
+
+/* trainer */
+.trainer .q{font-size:clamp(20px,3vw,26px);font-weight:700;margin:6px 0 16px}
+.trainer .q b{font-family:var(--mono);color:var(--brand)}
+.stats{display:flex;gap:22px;margin-top:20px;flex-wrap:wrap}
+.stat span{display:block;font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.stat b{font:800 26px var(--mono)}
+.verdict{margin-top:14px;font-weight:700;min-height:26px}
+.verdict.ok{color:var(--ok)}
+.verdict.bad{color:var(--bad)}
+
+footer{margin-top:72px;background:var(--navy);color:#9fb0e6;padding:30px 0;font-size:14px}
+footer b{color:#fff}
+
+@media (max-width:720px){
+  nav.menu{display:none}
+  .top .wrap{gap:10px}
+  .lang{margin-left:auto}
+  .hero{padding:56px 0 64px}
+  .result .btn{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .hero .bits span{animation:none}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#top"><i>01</i><span data-i="brand"></span></a>
+    <nav class="menu">
+      <a href="#convert" data-i="navConv"></a>
+      <a href="#arith" data-i="navArith"></a>
+      <a href="#cases" data-i="navCases"></a>
+      <a href="#trainer" data-i="navTrainer"></a>
+    </nav>
+    <div class="lang" role="group" aria-label="Language">
+      <button data-lang="kk" aria-pressed="false">ҚАЗ</button>
+      <button data-lang="ru" aria-pressed="true">РУС</button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero">
+  <div class="bits" id="bits" aria-hidden="true"></div>
+  <div class="wrap">
+    <span class="tagline" data-i="heroTag"></span>
+    <h1 data-i="heroH"></h1>
+    <p data-i="heroP"></p>
+    <div class="cta">
+      <a class="btn light" href="#convert" data-i="heroB1"></a>
+      <a class="btn" href="#trainer" data-i="heroB2"></a>
+    </div>
+    <div class="bases" aria-hidden="true"><b>2</b><b>8</b><b>10</b><b>16</b></div>
+  </div>
+</section>
+
+<section class="sec" id="why">
+  <div class="wrap">
+    <h2 data-i="whyH"></h2>
+    <div class="why" style="margin-top:20px">
+      <div class="card"><div class="ico">01</div><h3 data-i="why1h"></h3><p data-i="why1p"></p></div>
+      <div class="card"><div class="ico">FF</div><h3 data-i="why2h"></h3><p data-i="why2p"></p></div>
+      <div class="card"><div class="ico">=</div><h3 data-i="why3h"></h3><p data-i="why3p"></p></div>
+      <div class="card"><div class="ico">AI</div><h3 data-i="why4h"></h3><p data-i="why4p"></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== ПЕРЕВОДЫ ========== -->
+<section class="sec" id="convert">
+  <div class="wrap">
+    <h2 data-i="cvH"></h2>
+    <p class="lead" data-i="cvP"></p>
+    <div class="card">
+      <div class="row">
+        <div class="field grow"><label for="cvIn" data-i="cvNum"></label><input id="cvIn" type="text" value="45" autocomplete="off" spellcheck="false"></div>
+        <div class="field"><label for="cvFrom" data-i="cvFrom"></label><select id="cvFrom"></select></div>
+        <button class="swap" id="cvSwap" type="button" title="⇄" aria-label="swap">⇄</button>
+        <div class="field"><label for="cvTo" data-i="cvTo"></label><select id="cvTo"></select></div>
+      </div>
+      <p class="msg" id="cvMsg" aria-live="polite"></p>
+      <div class="result">
+        <div><small data-i="cvRes"></small><output id="cvOut">—</output></div>
+        <button class="btn light small" id="cvCopy" type="button" data-i="cvCopy"></button>
+      </div>
+      <h3 class="sh" data-i="cvAll"></h3>
+      <div class="minis" id="cvAllBox"></div>
+      <h3 class="sh" data-i="cvSteps"></h3>
+      <div id="cvSteps"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== АРИФМЕТИКА ========== -->
+<section class="sec" id="arith">
+  <div class="wrap">
+    <h2 data-i="arH"></h2>
+    <p class="lead" data-i="arP"></p>
+    <div class="card">
+      <div class="tabs" role="tablist" id="arTabs">
+        <button role="tab" data-op="add" aria-selected="true" data-i="opAdd"></button>
+        <button role="tab" data-op="mul" aria-selected="false" data-i="opMul"></button>
+        <button role="tab" data-op="div" aria-selected="false" data-i="opDiv"></button>
+      </div>
+      <p class="rule" id="arRule"></p>
+      <div class="row">
+        <div class="field grow"><label for="arA" data-i="arA"></label><input id="arA" type="text" value="1011" autocomplete="off" spellcheck="false" inputmode="numeric"></div>
+        <div class="field grow"><label for="arB" data-i="arB"></label><input id="arB" type="text" value="110" autocomplete="off" spellcheck="false" inputmode="numeric"></div>
+        <button class="btn ghost" id="arRand" type="button" data-i="arRand" style="height:46px"></button>
+      </div>
+      <p class="msg" id="arMsg" aria-live="polite"></p>
+      <div id="arOut"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== КЕЙСЫ ========== -->
+<section class="sec" id="cases">
+  <div class="wrap">
+    <h2 data-i="csH"></h2>
+    <p class="lead" data-i="csP"></p>
+    <div class="chips" id="csChips"></div>
+    <div class="cases" id="csList"></div>
+  </div>
+</section>
+
+<!-- ========== ТРЕНАЖЁР ========== -->
+<section class="sec" id="trainer">
+  <div class="wrap">
+    <h2 data-i="trH"></h2>
+    <p class="lead" data-i="trP"></p>
+    <div class="card trainer">
+      <div class="row" style="margin-bottom:16px">
+        <div class="field"><label for="trType" data-i="trType"></label><select id="trType"></select></div>
+        <button class="btn ghost" id="trNew" type="button" data-i="trNew" style="height:46px"></button>
+      </div>
+      <div class="q" id="trQ"></div>
+      <div class="row">
+        <div class="field grow"><label for="trAns" data-i="trYour"></label><input id="trAns" type="text" autocomplete="off" spellcheck="false"></div>
+        <button class="btn" id="trCheck" type="button" data-i="trCheck" style="height:46px"></button>
+        <button class="btn ghost" id="trShow" type="button" data-i="trShow" style="height:46px"></button>
+      </div>
+      <div class="verdict" id="trVerdict" aria-live="polite"></div>
+      <div class="stats">
+        <div class="stat"><span data-i="trScore"></span><b id="trScoreV">0 / 0</b></div>
+        <div class="stat"><span data-i="trStreak"></span><b id="trStreakV">0</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap"><b data-i="brand"></b> © 2026 · <span data-i="ft"></span></div>
+</footer>
+
+<script>
+(function(){
+'use strict';
+
+/* =========================================================
+   УТИЛИТЫ
+   ========================================================= */
+const $  = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const subs = n => String(n).replace(/\d/g, d => '₀₁₂₃₄₅₆₇₈₉'[d]);
+const strip0 = s => s.replace(/^0+(?=.)/, '');
+const ri = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const bin = n => n.toString(2);
+const B = s => BigInt('0b' + s);
+
+/* =========================================================
+   ЯЗЫК
+   ========================================================= */
+let lang = 'ru';
+try { const l = localStorage.getItem('ns_lang'); if (l === 'kk' || l === 'ru') lang = l; } catch (e) {}
+
+const I = {
+ru:{
+  title:'Системы счисления', brand:'Системы счисления',
+  navConv:'Переводы', navArith:'Арифметика', navCases:'Кейсы', navTrainer:'Тренажёр',
+  heroTag:'Информатика · системы счисления',
+  heroH:'Системы счисления: от двоичной до шестнадцатеричной',
+  heroP:'Переводите числа между системами, смотрите сложение, умножение и деление в двоичной системе по шагам и проверяйте себя на тренажёре.',
+  heroB1:'Открыть переводчик', heroB2:'Начать тренажёр',
+  whyH:'Зачем это нужно',
+  why1h:'Так думает компьютер', why1p:'Процессор хранит и обрабатывает всё в виде нулей и единиц — битов.',
+  why2h:'Шестнадцатеричная — сокращение', why2p:'Четыре бита = одна hex-цифра. Так записывают цвета, например #FF8800, и адреса в памяти.',
+  why3h:'Каждый шаг можно проверить', why3p:'Решения расписаны по шагам, а результат сверяется с десятичной системой.',
+  why4h:'Критичный взгляд на ИИ', why4p:'В кейсах «ИИ-аудит» нейросеть ошибается — найдите шаг с ошибкой сами.',
+  cvH:'Перевод между системами счисления',
+  cvP:'Введите число, выберите исходную и целевую системы (от 2 до 36). Поддерживаются целые неотрицательные числа.',
+  cvNum:'Число', cvFrom:'Из системы', cvTo:'В систему', cvRes:'Результат', cvCopy:'Копировать', copied:'Скопировано',
+  cvAll:'Это же число в основных системах', cvSteps:'Пошаговое решение',
+  base2:'двоичная', base8:'восьмеричная', base10:'десятичная', base16:'шестнадцатеричная',
+  errEmpty:'Введите число.', errBad:'Цифра «{c}» недопустима в системе с основанием {b}.', errLong:'Слишком длинное число (максимум 64 знака).',
+  stSame:'Системы совпадают — число не меняется.',
+  stExp:'Раскладываем число по степеням основания {b}:',
+  stDiv:'Делим {n} на {b} с остатками. Остатки читаем снизу вверх.',
+  stVia:'Идём через десятичную систему: {f} → 10 → {t}.',
+  stGroup:'Объединяем биты в группы по {k} справа налево (слева добавляем нули). Каждая группа — одна цифра.',
+  stUngroup:'Каждую цифру заменяем группой из {k} бит.',
+  colN:'Число', colQ:'Частное', colR:'Остаток',
+  arH:'Арифметика в двоичной системе',
+  arP:'Введите два двоичных числа и выберите действие. Решение расписано по шагам и проверяется в десятичной системе.',
+  opAdd:'Сложение', opMul:'Умножение', opDiv:'Деление', arA:'Первое число', arB:'Второе число', arRand:'Случайный пример',
+  arErr:'Допустимы только цифры 0 и 1, не более 16 знаков.', arZero:'Делить на ноль нельзя.',
+  ruleAdd:'Правила: 0+0=0 · 0+1=1 · 1+1=10 (пишем 0, перенос 1) · 1+1+1=11 (пишем 1, перенос 1).',
+  ruleMul:'Правила: 0×0=0 · 0×1=0 · 1×1=1. Цифра 1 — переписываем число со сдвигом, цифра 0 — строка нулей.',
+  ruleDiv:'Бит за битом: сносим очередной бит, сравниваем с делителем — если не меньше, пишем 1 и вычитаем, иначе пишем 0.',
+  lblCarry:'перенос',
+  stepsH:'Ход решения',
+  addStep:'Столбец {i}: {x} + {y} + перенос {c} = {s}₂ → пишем {w}, перенос {co}.',
+  addFinal:'Остался перенос 1 — записываем его слева.',
+  mulHint:'Умножаем первое число на каждую цифру второго справа налево (в подписи — вес разряда).',
+  mulSum:'Складываем частичные произведения — получаем результат.',
+  divCols:['Шаг','Снесли бит','Текущее число','≥ делителя?','Бит частного','Остаток'], yes:'да', no:'нет',
+  divRes:'Частное: {q}₂, остаток: {r}₂.',
+  chk:'Проверка в десятичной: ',
+  csH:'Банк кейсов',
+  csP:'Задачи с готовыми решениями. В кейсах «ИИ-аудит» нейросеть ошиблась — найдите шаг с ошибкой.',
+  chip_all:'Все', chip_conv:'Перевод', chip_add:'Сложение', chip_mul:'Умножение', chip_div:'Деление', chip_audit:'ИИ-аудит',
+  csShow:'Показать решение', csHide:'Скрыть решение', csAns:'Ответ',
+  csAuditHint:'Нажмите на шаг, в котором ИИ ошибся.',
+  csRight:'Верно! Это ошибочный шаг.', csWrong:'Этот шаг верный. Попробуйте другой.', csCorrect:'Правильный ответ',
+  trH:'Тренажёр', trP:'Случайные задачи с мгновенной проверкой. Ответ вводите без пробелов, ведущие нули не важны.',
+  trType:'Тип задач', trNew:'Новая задача', trYour:'Ваш ответ', trCheck:'Проверить', trShow:'Показать ответ',
+  trScore:'Верно / всего', trStreak:'Серия', trOk:'Верно!', trBad:'Неверно. Правильный ответ: {a}', trAnsIs:'Ответ: {a}',
+  ty_mix:'Все типы', ty_d2b:'10 → 2', ty_b2d:'2 → 10', ty_b2h:'2 → 16', ty_add:'Сложение', ty_mul:'Умножение', ty_div:'Деление',
+  q_d2b:'Переведите <b>{n}</b>₁₀ в двоичную систему',
+  q_b2d:'Переведите <b>{n}</b>₂ в десятичную систему',
+  q_b2h:'Переведите <b>{n}</b>₂ в шестнадцатеричную систему',
+  q_add:'Сложите в двоичной системе: <b>{a} + {b}</b>',
+  q_mul:'Умножьте в двоичной системе: <b>{a} × {b}</b>',
+  q_div:'Разделите в двоичной системе: <b>{a} ÷ {b}</b>',
+  ft:'учебный проект по информатике'
+},
+kk:{
+  title:'Санау жүйелері', brand:'Санау жүйелері',
+  navConv:'Түрлендіру', navArith:'Арифметика', navCases:'Кейстер', navTrainer:'Жаттықтырғыш',
+  heroTag:'Информатика · санау жүйелері',
+  heroH:'Санау жүйелері: екілік жүйеден он алтылыққа дейін',
+  heroP:'Сандарды жүйелер арасында түрлендіріңіз, екілік жүйеде қосу, көбейту және бөлуді қадам-қадаммен көріңіз, жаттықтырғышта өзіңізді тексеріңіз.',
+  heroB1:'Түрлендіргішті ашу', heroB2:'Жаттығуды бастау',
+  whyH:'Бұл не үшін керек',
+  why1h:'Компьютер былай ойлайды', why1p:'Процессор барлығын нөлдер мен бірлер — биттер түрінде сақтайды және өңдейді.',
+  why2h:'Он алтылық — қысқарту', why2p:'Төрт бит = бір hex-цифр. Түстер (мысалы, #FF8800) мен жад адрестері осылай жазылады.',
+  why3h:'Әр қадамды тексеруге болады', why3p:'Шешімдер қадам-қадаммен жазылған, нәтиже ондық жүйемен салыстырылады.',
+  why4h:'ЖИ-ға сыни көзқарас', why4p:'«ЖИ аудиті» кейстерінде нейрожелі қателеседі — қате қадамды өзіңіз табыңыз.',
+  cvH:'Санау жүйелері арасында түрлендіру',
+  cvP:'Санды енгізіңіз, бастапқы және мақсатты жүйені таңдаңыз (2-ден 36-ға дейін). Теріс емес бүтін сандар қолдау табады.',
+  cvNum:'Сан', cvFrom:'Қай жүйеден', cvTo:'Қай жүйеге', cvRes:'Нәтиже', cvCopy:'Көшіру', copied:'Көшірілді',
+  cvAll:'Сол сан негізгі жүйелерде', cvSteps:'Қадамдық шешім',
+  base2:'екілік', base8:'сегіздік', base10:'ондық', base16:'он алтылық',
+  errEmpty:'Санды енгізіңіз.', errBad:'«{c}» таңбасы {b} негізді жүйеде жарамсыз.', errLong:'Сан тым ұзын (ең көбі 64 таңба).',
+  stSame:'Жүйелер бірдей — сан өзгермейді.',
+  stExp:'Санды {b} негізінің дәрежелері бойынша жіктейміз:',
+  stDiv:'{n} санын {b}-ге қалдықпен бөлеміз. Қалдықтарды төменнен жоғары қарай оқимыз.',
+  stVia:'Ондық жүйе арқылы өтеміз: {f} → 10 → {t}.',
+  stGroup:'Биттерді оңнан солға қарай {k}-тен топтаймыз (сол жағына нөл қосамыз). Әр топ — бір цифр.',
+  stUngroup:'Әр цифрды {k} биттік топпен ауыстырамыз.',
+  colN:'Сан', colQ:'Бөлінді', colR:'Қалдық',
+  arH:'Екілік жүйедегі арифметика',
+  arP:'Екі екілік санды енгізіп, әрекетті таңдаңыз. Шешім қадам-қадаммен жазылады және ондық жүйеде тексеріледі.',
+  opAdd:'Қосу', opMul:'Көбейту', opDiv:'Бөлу', arA:'Бірінші сан', arB:'Екінші сан', arRand:'Кездейсоқ мысал',
+  arErr:'Тек 0 және 1 цифрлары, 16 таңбадан аспауы керек.', arZero:'Нөлге бөлуге болмайды.',
+  ruleAdd:'Ережелер: 0+0=0 · 0+1=1 · 1+1=10 (0 жазамыз, тасымал 1) · 1+1+1=11 (1 жазамыз, тасымал 1).',
+  ruleMul:'Ережелер: 0×0=0 · 0×1=0 · 1×1=1. Цифр 1 — санды жылжытып көшіреміз, цифр 0 — нөлдер жолы.',
+  ruleDiv:'Бит-бит бойынша: келесі битті түсіреміз, бөлгішпен салыстырамыз — кем болмаса, 1 жазып, азайтамыз, әйтпесе 0 жазамыз.',
+  lblCarry:'тасымал',
+  stepsH:'Шешу барысы',
+  addStep:'{i}-баған: {x} + {y} + тасымал {c} = {s}₂ → {w} жазамыз, тасымал {co}.',
+  addFinal:'1 тасымал қалды — оны сол жаққа жазамыз.',
+  mulHint:'Бірінші санды екіншінің әр цифрына оңнан солға көбейтеміз (жазбада — разряд салмағы).',
+  mulSum:'Жартылай көбейтінділерді қосамыз — нәтиже шығады.',
+  divCols:['Қадам','Түсірілген бит','Ағымдағы сан','≥ бөлгіш?','Бөлінді biті','Қалдық'], yes:'иә', no:'жоқ',
+  divRes:'Бөлінді: {q}₂, қалдық: {r}₂.',
+  chk:'Ондық жүйеде тексеру: ',
+  csH:'Кейстер банкі',
+  csP:'Дайын шешімі бар есептер. «ЖИ аудиті» кейстерінде нейрожелі қателескен — қате қадамды табыңыз.',
+  chip_all:'Барлығы', chip_conv:'Түрлендіру', chip_add:'Қосу', chip_mul:'Көбейту', chip_div:'Бөлу', chip_audit:'ЖИ аудиті',
+  csShow:'Шешімін көрсету', csHide:'Шешімін жасыру', csAns:'Жауап',
+  csAuditHint:'ЖИ қателескен қадамды басыңыз.',
+  csRight:'Дұрыс! Бұл қате қадам.', csWrong:'Бұл қадам дұрыс. Басқасын байқап көріңіз.', csCorrect:'Дұрыс жауап',
+  trH:'Жаттықтырғыш', trP:'Бірден тексерілетін кездейсоқ есептер. Жауапты бос орынсыз енгізіңіз, алдыңғы нөлдер маңызды емес.',
+  trType:'Есеп түрі', trNew:'Жаңа есеп', trYour:'Сіздің жауабыңыз', trCheck:'Тексеру', trShow:'Жауапты көрсету',
+  trScore:'Дұрыс / барлығы', trStreak:'Қатар', trOk:'Дұрыс!', trBad:'Қате. Дұрыс жауап: {a}', trAnsIs:'Жауап: {a}',
+  ty_mix:'Барлық түрі', ty_d2b:'10 → 2', ty_b2d:'2 → 10', ty_b2h:'2 → 16', ty_add:'Қосу', ty_mul:'Көбейту', ty_div:'Бөлу',
+  q_d2b:'<b>{n}</b>₁₀ санын екілік жүйеге аударыңыз',
+  q_b2d:'<b>{n}</b>₂ санын ондық жүйеге аударыңыз',
+  q_b2h:'<b>{n}</b>₂ санын он алтылық жүйеге аударыңыз',
+  q_add:'Екілік жүйеде қосыңыз: <b>{a} + {b}</b>',
+  q_mul:'Екілік жүйеде көбейтіңіз: <b>{a} × {b}</b>',
+  q_div:'Екілік жүйеде бөліңіз: <b>{a} ÷ {b}</b>',
+  ft:'информатика пәнінен оқу жобасы'
+}};
+I.kk.divCols = ['Қадам','Түсірілген бит','Ағымдағы сан','≥ бөлгіш?','Бөлінді биті','Қалдық'];
+
+function t(k, p){
+  let s = (I[lang][k] !== undefined ? I[lang][k] : I.ru[k]);
+  if (s === undefined) return k;
+  if (p) for (const n in p) s = s.split('{' + n + '}').join(p[n]);
+  return s;
+}
+const L = o => o[lang];
+
+/* =========================================================
+   ПЕРЕВОД
+   ========================================================= */
+function parseNum(raw, base){
+  const s = raw.replace(/[\s_]/g, '').toUpperCase();
+  if (!s) return {err:'errEmpty'};
+  if (s.length > 64) return {err:'errLong'};
+  const Bb = BigInt(base); let v = 0n; const digs = [];
+  for (const ch of s){
+    const d = parseInt(ch, 36);
+    if (Number.isNaN(d) || d >= base) return {err:'errBad', ch, base};
+    v = v * Bb + BigInt(d); digs.push(d);
+  }
+  return {v, digs, s};
+}
+const dch = d => d.toString(36).toUpperCase();
+const baseName = b => ({2:t('base2'),8:t('base8'),10:t('base10'),16:t('base16')}[b] || '');
+
+function fillBaseSelects(){
+  ['cvFrom','cvTo'].forEach((id, k) => {
+    const sel = $('#' + id); const cur = sel.value || (k === 0 ? '10' : '2');
+    sel.innerHTML = '';
+    for (let b = 2; b <= 36; b++){
+      const o = document.createElement('option'); o.value = b;
+      o.textContent = baseName(b) ? b + ' — ' + baseName(b) : String(b);
+      sel.appendChild(o);
+    }
+    sel.value = cur;
+  });
+}
+
+function divBlock(v, base){
+  const Bb = BigInt(base);
+  let html = '<p class="note">' + esc(t('stDiv', {n: v.toString(), b: base})) + '</p>';
+  if (v === 0n) return html + '<div class="eq">0</div>';
+  let rows = '', n = v;
+  while (n > 0n){
+    const q = n / Bb, r = n % Bb, rn = Number(r);
+    rows += `<tr><td>${n}</td><td>${n} ÷ ${base}</td><td>${q}</td><td>${rn}${rn > 9 ? ' (' + dch(rn) + ')' : ''}</td></tr>`;
+    n = q;
+  }
+  return html + `<div class="scroll"><table class="tbl"><thead><tr><th>${esc(t('colN'))}</th><th>÷</th><th>${esc(t('colQ'))}</th><th>${esc(t('colR'))}</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function expBlock(digs, base){
+  const Bb = BigInt(base), n = digs.length;
+  const terms = digs.map((d, k) => `${d}·${base}<sup>${n - 1 - k}</sup>`).join(' + ');
+  const vals  = digs.map((d, k) => (BigInt(d) * Bb ** BigInt(n - 1 - k)).toString()).join(' + ');
+  let v = 0n; digs.forEach(d => v = v * Bb + BigInt(d));
+  return `<p class="note">${esc(t('stExp', {b: base}))}</p><div class="eq">${terms}</div><div class="eq">${vals}</div><div class="eq">= <b>${v}</b></div>`;
+}
+function groupBlock(fb, tb, s){
+  const k = (fb === 2 ? tb : fb) === 8 ? 3 : 4;
+  let pairs = '', note;
+  if (fb === 2){
+    const pad = (k - s.length % k) % k, p = '0'.repeat(pad) + s;
+    for (let i = 0; i < p.length; i += k){
+      const g = p.slice(i, i + k);
+      pairs += `<div class="pair"><span>${g}</span><b>${dch(parseInt(g, 2))}</b></div>`;
+    }
+    note = t('stGroup', {k});
+  } else {
+    for (const ch of s){
+      pairs += `<div class="pair"><b>${ch}</b><span>${parseInt(ch, 36).toString(2).padStart(k, '0')}</span></div>`;
+    }
+    note = t('stUngroup', {k});
+  }
+  return `<p class="note">${esc(note)}</p><div class="pairs">${pairs}</div>`;
+}
+
+function runConvert(){
+  const fb = +$('#cvFrom').value, tb = +$('#cvTo').value;
+  const msg = $('#cvMsg'), out = $('#cvOut'), steps = $('#cvSteps'), all = $('#cvAllBox');
+  const p = parseNum($('#cvIn').value, fb);
+  msg.className = 'msg';
+  if (p.err){
+    msg.textContent = t(p.err, p.err === 'errBad' ? {c: p.ch, b: p.base} : null);
+    if (p.err !== 'errEmpty') msg.classList.add('err');
+    out.textContent = '—'; steps.innerHTML = ''; all.innerHTML = ''; return;
+  }
+  msg.textContent = '';
+  const v = p.v;
+  out.innerHTML = esc(v.toString(tb).toUpperCase()) + '<sub style="font-size:.55em;color:#9fb0e6">' + tb + '</sub>';
+  out.dataset.raw = v.toString(tb).toUpperCase();
+
+  all.innerHTML = [2, 8, 10, 16].map(b =>
+    `<div class="mini"><span>${esc(baseName(b))} (${b})</span><b>${esc(v.toString(b).toUpperCase())}</b></div>`).join('');
+
+  let html = '';
+  if (fb === tb){
+    html = `<p class="note">${esc(t('stSame'))}</p>`;
+  } else if ((fb === 2 && (tb === 8 || tb === 16)) || (tb === 2 && (fb === 8 || fb === 16))){
+    html = groupBlock(fb, tb, p.s);
+  } else {
+    if (fb !== 10 && tb !== 10) html += `<p class="note">${esc(t('stVia', {f: fb, t: tb}))}</p>`;
+    if (fb !== 10) html += expBlock(p.digs, fb);
+    if (tb !== 10) html += divBlock(v, tb);
+  }
+  steps.innerHTML = html;
+}
+
+/* =========================================================
+   ДВОИЧНАЯ АРИФМЕТИКА
+   ========================================================= */
+let op = 'add';
+
+function gridHTML(rows, W){
+  let h = '<div class="gridbox"><table class="grid">';
+  rows.forEach(r => {
+    const cells = r.cells.slice(); while (cells.length < W) cells.unshift({t:''});
+    h += `<tr class="${r.cls || ''}"><th>${r.label || ''}</th>` +
+         cells.map(c => `<td class="${c.c || ''}">${esc(c.t)}</td>`).join('') + '</tr>';
+  });
+  return h + '</table></div>';
+}
+const digitCells = (s, extra) => [...s].map(ch => ({t: ch, c: extra || ''}));
+
+function renderAdd(a, b){
+  const W = Math.max(a.length, b.length), pa = a.padStart(W, '0'), pb = b.padStart(W, '0');
+  let carry = 0; const res = [], cin = [], steps = [];
+  for (let i = W - 1; i >= 0; i--){
+    const x = +pa[i], y = +pb[i], s = x + y + carry;
+    cin[i] = carry; res[i] = s & 1;
+    steps.push(t('addStep', {i: W - i, x, y, c: carry, s: bin(s), w: s & 1, co: s >> 1}));
+    carry = s >> 1;
+  }
+  const out = (carry ? '1' : '') + res.join('');
+  const carryRow = [{t:''}].concat(cin.map(c => ({t: c ? '1' : '', c: 'carry'})));
+  const rows = [
+    {label: esc(t('lblCarry')), cells: carryRow},
+    {label: '', cells: [{t:''}].concat(digitCells(a))},
+    {label: '+', cells: [{t:''}].concat(digitCells(b))},
+    {label: '=', cls: 'sep', cells: digitCells(out, 'res')}
+  ];
+  // выровнять строки операндов по правому краю
+  rows[1].cells = [{t:''}].concat(Array(W - a.length).fill({t:''}), digitCells(a));
+  rows[2].cells = [{t:''}].concat(Array(W - b.length).fill({t:''}), digitCells(b));
+  rows[3].cells = [{t: carry ? '1' : '', c: 'res'}].concat(res.map(d => ({t: String(d), c: 'res'})));
+  if (!carry) rows[3].cells[0].t = '';
+  let h = gridHTML(rows, W + 1);
+  h += `<h3 class="sh">${esc(t('stepsH'))}</h3><ol class="st">` + steps.map(s => `<li>${esc(s)}</li>`).join('') +
+       (carry ? `<li>${esc(t('addFinal'))}</li>` : '') + '</ol>';
+  const dx = B(a), dy = B(b);
+  h += `<div class="check">${esc(t('chk'))}${dx} + ${dy} = ${dx + dy} → ${strip0(out)}₂</div>`;
+  return h;
+}
+
+function renderMul(a, b){
+  const prod = B(a) * B(b), outS = bin(prod);
+  const partials = [];
+  for (let i = 0; i < b.length; i++){
+    const bit = b[b.length - 1 - i];
+    partials.push({bit, i, s: (bit === '1' ? a : '0'.repeat(a.length)) + '0'.repeat(i)});
+  }
+  const W = Math.max(outS.length, a.length + b.length, ...partials.map(p => p.s.length));
+  const rows = [
+    {label: '', cells: digitCells(a)},
+    {label: '×', cells: digitCells(b)},
+  ];
+  partials.forEach((p, k) => {
+    const cells = [...p.s].map((ch, idx) => ({t: ch, c: idx >= p.s.length - p.i ? 'shift' : ''}));
+    rows.push({label: `${p.bit}·2<sup>${p.i}</sup>`, cls: (k === 0 ? 'sep ' : '') + (p.bit === '0' ? 'zero' : ''), cells});
+  });
+  rows.push({label: '=', cls: 'sep', cells: digitCells(outS, 'res')});
+  let h = `<p class="note">${esc(t('mulHint'))}</p>` + gridHTML(rows, W);
+  h += `<p class="note">${esc(t('mulSum'))}</p>`;
+  h += `<div class="check">${esc(t('chk'))}${B(a)} × ${B(b)} = ${prod} → ${outS}₂</div>`;
+  return h;
+}
+
+function renderDiv(a, b){
+  const D = B(b); let rem = 0n, q = '';
+  const hd = t('divCols');
+  let rows = '';
+  [...a].forEach((ch, i) => {
+    const cur = (rem << 1n) | BigInt(ch), ge = cur >= D;
+    const nrem = ge ? cur - D : cur;
+    q += ge ? '1' : '0';
+    rows += `<tr><td>${i + 1}</td><td>${ch}</td><td>${bin(cur)}</td><td class="${ge ? 'yes' : 'no'}">${esc(t(ge ? 'yes' : 'no'))}</td><td>${ge ? 1 : 0}</td><td>${bin(nrem)}</td></tr>`;
+    rem = nrem;
+  });
+  const qs = strip0(q), rs = bin(rem);
+  let h = `<div class="scroll"><table class="tbl"><thead><tr>${hd.map(x => `<th>${esc(x)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  h += `<div class="eq" style="margin-top:14px">${esc(t('divRes', {q: qs, r: rs}))}</div>`;
+  const da = B(a), db = D, dq = B(qs);
+  h += `<div class="check">${esc(t('chk'))}${da} ÷ ${db} = ${dq} (${rem}) → ${db}·${dq} + ${rem} = ${db * dq + rem}</div>`;
+  return h;
+}
+
+function runArith(){
+  const a = strip0($('#arA').value.replace(/\s/g, '')), b = strip0($('#arB').value.replace(/\s/g, ''));
+  const msg = $('#arMsg'), out = $('#arOut');
+  const ok = s => /^[01]{1,16}$/.test(s);
+  msg.className = 'msg';
+  if (!a || !b){ msg.textContent = ''; out.innerHTML = ''; return; }
+  if (!ok(a) || !ok(b)){ msg.textContent = t('arErr'); msg.classList.add('err'); out.innerHTML = ''; return; }
+  if (op === 'div' && B(b) === 0n){ msg.textContent = t('arZero'); msg.classList.add('err'); out.innerHTML = ''; return; }
+  msg.textContent = '';
+  out.innerHTML = op === 'add' ? renderAdd(a, b) : op === 'mul' ? renderMul(a, b) : renderDiv(a, b);
+}
+function setOp(o){
+  op = o;
+  $$('#arTabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.op === o)));
+  $('#arRule').textContent = t(o === 'add' ? 'ruleAdd' : o === 'mul' ? 'ruleMul' : 'ruleDiv');
+  runArith();
+}
+function randExample(){
+  let a, b;
+  if (op === 'div'){ const d = ri(2, 7), q = ri(2, 15); b = bin(d); a = bin(d * q + ri(0, d - 1)); }
+  else if (op === 'mul'){ a = bin(ri(3, 30)); b = bin(ri(2, 15)); }
+  else { a = bin(ri(5, 120)); b = bin(ri(3, 90)); }
+  $('#arA').value = a; $('#arB').value = b; runArith();
+}
+
+/* =========================================================
+   КЕЙСЫ
+   ========================================================= */
+const CASES = [
+ {id:'c1', tags:['conv'],
+  title:{ru:'Из десятичной в двоичную', kk:'Ондықтан екілікке'},
+  task:{ru:'Переведите 45₁₀ в двоичную систему.', kk:'45₁₀ санын екілік жүйеге аударыңыз.'},
+  sol:{ru:['45 ÷ 2 = 22, остаток 1','22 ÷ 2 = 11, остаток 0','11 ÷ 2 = 5, остаток 1','5 ÷ 2 = 2, остаток 1','2 ÷ 2 = 1, остаток 0','1 ÷ 2 = 0, остаток 1','Читаем остатки снизу вверх: 101101'],
+       kk:['45 ÷ 2 = 22, қалдық 1','22 ÷ 2 = 11, қалдық 0','11 ÷ 2 = 5, қалдық 1','5 ÷ 2 = 2, қалдық 1','2 ÷ 2 = 1, қалдық 0','1 ÷ 2 = 0, қалдық 1','Қалдықтарды төменнен жоғары оқимыз: 101101']},
+  ans:'101101₂'},
+ {id:'c2', tags:['conv'],
+  title:{ru:'Из двоичной в десятичную', kk:'Екіліктен ондыққа'},
+  task:{ru:'Переведите 110101₂ в десятичную систему.', kk:'110101₂ санын ондық жүйеге аударыңыз.'},
+  sol:{ru:['Раскладываем по степеням двойки справа налево','1·2⁵ + 1·2⁴ + 0·2³ + 1·2² + 0·2¹ + 1·2⁰','32 + 16 + 0 + 4 + 0 + 1 = 53'],
+       kk:['Екінің дәрежелері бойынша оңнан солға жіктейміз','1·2⁵ + 1·2⁴ + 0·2³ + 1·2² + 0·2¹ + 1·2⁰','32 + 16 + 0 + 4 + 0 + 1 = 53']},
+  ans:'53₁₀'},
+ {id:'c3', tags:['conv'],
+  title:{ru:'Из двоичной в шестнадцатеричную', kk:'Екіліктен он алтылыққа'},
+  task:{ru:'Переведите 11010111₂ в шестнадцатеричную систему.', kk:'11010111₂ санын он алтылық жүйеге аударыңыз.'},
+  sol:{ru:['Делим биты на тетрады справа налево: 1101 | 0111','1101₂ = 13 = D','0111₂ = 7','Собираем: D7'],
+       kk:['Биттерді оңнан солға қарай тетрадаларға бөлеміз: 1101 | 0111','1101₂ = 13 = D','0111₂ = 7','Жинаймыз: D7']},
+  ans:'D7₁₆'},
+ {id:'c4', tags:['conv'],
+  title:{ru:'Из десятичной в шестнадцатеричную', kk:'Ондықтан он алтылыққа'},
+  task:{ru:'Переведите 255₁₀ в шестнадцатеричную систему.', kk:'255₁₀ санын он алтылық жүйеге аударыңыз.'},
+  sol:{ru:['255 ÷ 16 = 15, остаток 15 (F)','15 ÷ 16 = 0, остаток 15 (F)','Читаем снизу вверх: FF'],
+       kk:['255 ÷ 16 = 15, қалдық 15 (F)','15 ÷ 16 = 0, қалдық 15 (F)','Төменнен жоғары оқимыз: FF']},
+  ans:'FF₁₆'},
+ {id:'c5', tags:['add'],
+  title:{ru:'Сложение с переносами', kk:'Тасымалмен қосу'},
+  task:{ru:'Сложите 1011₂ + 1101₂.', kk:'1011₂ + 1101₂ қосыңыз.'},
+  sol:{ru:['Столбец 1: 1+1 = 10 → пишем 0, перенос 1','Столбец 2: 1+0+1 = 10 → пишем 0, перенос 1','Столбец 3: 0+1+1 = 10 → пишем 0, перенос 1','Столбец 4: 1+1+1 = 11 → пишем 1, перенос 1','Записываем перенос слева: 11000'],
+       kk:['1-баған: 1+1 = 10 → 0 жазамыз, тасымал 1','2-баған: 1+0+1 = 10 → 0 жазамыз, тасымал 1','3-баған: 0+1+1 = 10 → 0 жазамыз, тасымал 1','4-баған: 1+1+1 = 11 → 1 жазамыз, тасымал 1','Тасымалды сол жаққа жазамыз: 11000']},
+  ans:'11000₂  (11 + 13 = 24)'},
+ {id:'c6', tags:['mul'],
+  title:{ru:'Умножение со сдвигом', kk:'Жылжытып көбейту'},
+  task:{ru:'Умножьте 101₂ × 11₂.', kk:'101₂ × 11₂ көбейтіңіз.'},
+  sol:{ru:['Последняя цифра множителя 1 → 101','Следующая цифра 1 → 101 со сдвигом на 1: 1010','Складываем: 101 + 1010 = 1111'],
+       kk:['Көбейткіштің соңғы цифры 1 → 101','Келесі цифр 1 → 101 санын 1-ге жылжытамыз: 1010','Қосамыз: 101 + 1010 = 1111']},
+  ans:'1111₂  (5 × 3 = 15)'},
+ {id:'c7', tags:['div'],
+  title:{ru:'Деление с остатком', kk:'Қалдықпен бөлу'},
+  task:{ru:'Разделите 1101₂ на 11₂.', kk:'1101₂ санын 11₂ санына бөліңіз.'},
+  sol:{ru:['Снесли 1: 1 < 11 → бит частного 0','Снесли 1: 11 ≥ 11 → бит 1, остаток 0','Снесли 0: 0 < 11 → бит 0','Снесли 1: 1 < 11 → бит 0, остаток 1','Частное 0100 = 100'],
+       kk:['1 түсірдік: 1 < 11 → бөлінді биті 0','1 түсірдік: 11 ≥ 11 → бит 1, қалдық 0','0 түсірдік: 0 < 11 → бит 0','1 түсірдік: 1 < 11 → бит 0, қалдық 1','Бөлінді 0100 = 100']},
+  ans:'100₂, остаток 1₂  (13 ÷ 3 = 4, ост. 1)'},
+ {id:'a1', tags:['add','audit'],
+  title:{ru:'ИИ-аудит: сложение', kk:'ЖИ аудиті: қосу'},
+  task:{ru:'ИИ сложил 1011₂ + 111₂. Найдите шаг с ошибкой.', kk:'ЖИ 1011₂ + 111₂ санын қосты. Қате қадамды табыңыз.'},
+  audit:{wrong:2,
+   steps:{ru:['Выравниваем числа: 1011 и 0111','Столбец 1: 1+1 = 10 → пишем 0, перенос 1','Столбец 2: 1+1+1 = 10 → пишем 0, перенос 1','Столбец 3: 0+1+1 = 10 → пишем 0, перенос 1','Столбец 4: 1+0+1 = 10 → пишем 0, перенос 1','Записываем перенос слева. Ответ: 10000'],
+          kk:['Сандарды туралаймыз: 1011 және 0111','1-баған: 1+1 = 10 → 0 жазамыз, тасымал 1','2-баған: 1+1+1 = 10 → 0 жазамыз, тасымал 1','3-баған: 0+1+1 = 10 → 0 жазамыз, тасымал 1','4-баған: 1+0+1 = 10 → 0 жазамыз, тасымал 1','Тасымалды сол жаққа жазамыз. Жауап: 10000']},
+   why:{ru:'1+1+1 = 3 = 11₂, значит пишем 1 и переносим 1.', kk:'1+1+1 = 3 = 11₂, яғни 1 жазып, 1 тасымалдаймыз.'}},
+  ans:'10010₂  (11 + 7 = 18)'},
+ {id:'a2', tags:['mul','audit'],
+  title:{ru:'ИИ-аудит: умножение', kk:'ЖИ аудиті: көбейту'},
+  task:{ru:'ИИ умножил 111₂ × 101₂. Найдите шаг с ошибкой.', kk:'ЖИ 111₂ × 101₂ санын көбейтті. Қате қадамды табыңыз.'},
+  audit:{wrong:3,
+   steps:{ru:['Цифры множителя справа налево: 1, 0, 1','Цифра 1, сдвиг 0: 111','Цифра 0, сдвиг 1: 0000','Цифра 1, сдвиг 1: 1110','Складываем: 111 + 0000 + 1110 = 10101','Ответ: 10101'],
+          kk:['Көбейткіш цифрлары оңнан солға: 1, 0, 1','Цифр 1, жылжу 0: 111','Цифр 0, жылжу 1: 0000','Цифр 1, жылжу 1: 1110','Қосамыз: 111 + 0000 + 1110 = 10101','Жауап: 10101']},
+   why:{ru:'Третья цифра стоит в разряде 2², значит сдвиг должен быть 2: 11100.', kk:'Үшінші цифр 2² разрядында тұр, сондықтан жылжу 2 болуы керек: 11100.'}},
+  ans:'100011₂  (7 × 5 = 35)'},
+ {id:'a3', tags:['div','audit'],
+  title:{ru:'ИИ-аудит: деление', kk:'ЖИ аудиті: бөлу'},
+  task:{ru:'ИИ разделил 1010₂ на 10₂. Найдите шаг с ошибкой.', kk:'ЖИ 1010₂ санын 10₂ санына бөлді. Қате қадамды табыңыз.'},
+  audit:{wrong:2,
+   steps:{ru:['Делитель 10₂ = 2','Деление на 2 в двоичной системе — это сдвиг вправо','Сдвигаем 1010 вправо на 2 разряда: 10','Ответ: 10₂'],
+          kk:['Бөлгіш 10₂ = 2','Екілік жүйеде 2-ге бөлу — оңға жылжыту','1010 санын оңға 2 разрядқа жылжытамыз: 10','Жауап: 10₂']},
+   why:{ru:'Деление на 2 — сдвиг на один разряд: 1010 → 101.', kk:'2-ге бөлу — бір разрядқа жылжыту: 1010 → 101.'}},
+  ans:'101₂  (10 ÷ 2 = 5)'},
+ {id:'a4', tags:['conv','audit'],
+  title:{ru:'ИИ-аудит: перевод', kk:'ЖИ аудиті: түрлендіру'},
+  task:{ru:'ИИ перевёл 13₁₀ в двоичную систему. Найдите шаг с ошибкой.', kk:'ЖИ 13₁₀ санын екілік жүйеге аударды. Қате қадамды табыңыз.'},
+  audit:{wrong:4,
+   steps:{ru:['13 ÷ 2 = 6, остаток 1','6 ÷ 2 = 3, остаток 0','3 ÷ 2 = 1, остаток 1','1 ÷ 2 = 0, остаток 1','Читаем остатки сверху вниз: 1011'],
+          kk:['13 ÷ 2 = 6, қалдық 1','6 ÷ 2 = 3, қалдық 0','3 ÷ 2 = 1, қалдық 1','1 ÷ 2 = 0, қалдық 1','Қалдықтарды жоғарыдан төмен оқимыз: 1011']},
+   why:{ru:'Остатки читают снизу вверх: 1101. А 1011₂ = 11.', kk:'Қалдықтарды төменнен жоғары оқиды: 1101. Ал 1011₂ = 11.'}},
+  ans:'1101₂'}
+];
+
+let csFilter = 'all';
+const csOpen = {}, csAudit = {};
+
+function renderCases(){
+  const chips = ['all','conv','add','mul','div','audit'];
+  $('#csChips').innerHTML = chips.map(c =>
+    `<button type="button" data-f="${c}" aria-pressed="${csFilter === c}">${esc(t('chip_' + c))}</button>`).join('');
+  const list = CASES.filter(c => csFilter === 'all' || c.tags.includes(csFilter));
+  $('#csList').innerHTML = list.map(c => {
+    const tags = c.tags.map(g => `<span class="tag tag-${g}">${esc(t('chip_' + g))}</span>`).join('');
+    let body;
+    if (c.audit){
+      const st = csAudit[c.id] || {tried: [], solved: false};
+      const steps = L(c.audit.steps).map((s, i) => {
+        const cls = st.solved && i === c.audit.wrong ? ' ok' : st.tried.includes(i) ? ' bad' : '';
+        return `<li><button type="button" class="step${cls}" data-case="${c.id}" data-i="${i}">${esc(s)}</button></li>`;
+      }).join('');
+      let fb = '';
+      if (st.solved) fb = `<span class="good">${esc(t('csRight'))}</span> ${esc(L(c.audit.why))}<br><b>${esc(t('csCorrect'))}:</b> ${esc(c.ans)}`;
+      else if (st.tried.length) fb = `<span class="oops">${esc(t('csWrong'))}</span>`;
+      body = `<p class="hint">${esc(t('csAuditHint'))}</p><ol class="aud">${steps}</ol><div class="fb">${fb}</div>`;
+    } else {
+      const open = !!csOpen[c.id];
+      body = `<button type="button" class="btn ghost small" data-toggle="${c.id}">${esc(t(open ? 'csHide' : 'csShow'))}</button>` +
+        `<div class="sol"${open ? '' : ' hidden'}><ol>${L(c.sol).map(s => `<li>${esc(s)}</li>`).join('')}</ol><p class="ans"><b>${esc(t('csAns'))}:</b> ${esc(c.ans)}</p></div>`;
+    }
+    return `<article class="card case"><div>${tags}</div><h3>${esc(L(c.title))}</h3><p class="task">${esc(L(c.task))}</p>${body}</article>`;
+  }).join('');
+}
+
+/* =========================================================
+   ТРЕНАЖЁР
+   ========================================================= */
+const TYPES = ['mix','d2b','b2d','b2h','add','mul','div'];
+const GEN = {
+  d2b(){ const n = ri(9, 255); return {k:'q_d2b', p:{n}, ans: bin(n)}; },
+  b2d(){ const n = ri(9, 255); return {k:'q_b2d', p:{n: bin(n)}, ans: String(n)}; },
+  b2h(){ const n = ri(16, 255); return {k:'q_b2h', p:{n: bin(n).padStart(8, '0')}, ans: n.toString(16).toUpperCase()}; },
+  add(){ const a = ri(5, 60), b = ri(3, 60); return {k:'q_add', p:{a: bin(a), b: bin(b)}, ans: bin(a + b)}; },
+  mul(){ const a = ri(3, 15), b = ri(3, 15); return {k:'q_mul', p:{a: bin(a), b: bin(b)}, ans: bin(a * b)}; },
+  div(){ const b = ri(2, 7), q = ri(2, 15); return {k:'q_div', p:{a: bin(b * q), b: bin(b)}, ans: bin(q)}; }
+};
+const tr = {task:null, ok:0, total:0, streak:0, done:false};
+const norm = s => strip0(s.replace(/[\s_]/g, '').toUpperCase());
+
+function newTask(){
+  const sel = $('#trType').value;
+  const type = sel === 'mix' ? ['d2b','b2d','b2h','add','mul','div'][ri(0, 5)] : sel;
+  tr.task = GEN[type](); tr.done = false;
+  $('#trAns').value = ''; $('#trVerdict').textContent = ''; $('#trVerdict').className = 'verdict';
+  renderTask(); $('#trAns').focus({preventScroll:true});
+}
+function renderTask(){
+  if (tr.task) $('#trQ').innerHTML = t(tr.task.k, tr.task.p);
+  $('#trScoreV').textContent = tr.ok + ' / ' + tr.total;
+  $('#trStreakV').textContent = tr.streak;
+}
+function checkAnswer(){
+  if (!tr.task || tr.done) return;
+  const v = norm($('#trAns').value); if (!v) return;
+  const good = v === tr.task.ans;
+  const box = $('#trVerdict');
+  tr.total++; tr.done = true;
+  if (good){ tr.ok++; tr.streak++; box.className = 'verdict ok'; box.textContent = t('trOk'); }
+  else { tr.streak = 0; box.className = 'verdict bad'; box.textContent = t('trBad', {a: tr.task.ans}); }
+  renderTask();
+}
+function showAnswer(){
+  if (!tr.task) return;
+  const box = $('#trVerdict');
+  if (!tr.done){ tr.total++; tr.streak = 0; tr.done = true; }
+  box.className = 'verdict'; box.textContent = t('trAnsIs', {a: tr.task.ans});
+  renderTask();
+}
+function fillTypes(){
+  const sel = $('#trType'), cur = sel.value || 'mix';
+  sel.innerHTML = TYPES.map(k => `<option value="${k}">${esc(t('ty_' + k))}</option>`).join('');
+  sel.value = cur;
+}
+
+/* =========================================================
+   ПРИМЕНЕНИЕ ЯЗЫКА
+   ========================================================= */
+function applyLang(){
+  document.documentElement.lang = lang;
+  document.title = t('title');
+  $$('[data-i]').forEach(el => el.textContent = t(el.dataset.i));
+  $$('.lang button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+  fillBaseSelects(); fillTypes();
+  runConvert(); setOp(op); renderCases(); renderTask();
+}
+
+/* =========================================================
+   СОБЫТИЯ
+   ========================================================= */
+$$('.lang button').forEach(b => b.addEventListener('click', () => {
+  lang = b.dataset.lang; try { localStorage.setItem('ns_lang', lang); } catch (e) {}
+  applyLang();
+}));
+['#cvIn','#cvFrom','#cvTo'].forEach(s => $(s).addEventListener('input', runConvert));
+$('#cvSwap').addEventListener('click', () => {
+  const f = $('#cvFrom'), tt = $('#cvTo'), o = $('#cvOut');
+  const res = o.dataset.raw; const x = f.value; f.value = tt.value; tt.value = x;
+  if (res) $('#cvIn').value = res;
+  runConvert();
+});
+$('#cvCopy').addEventListener('click', () => {
+  const v = $('#cvOut').dataset.raw; if (!v) return;
+  const btn = $('#cvCopy'), old = btn.textContent;
+  const done = () => { btn.textContent = t('copied'); setTimeout(() => btn.textContent = t('cvCopy'), 1400); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(done, done); else done();
+});
+$$('#arTabs button').forEach(b => b.addEventListener('click', () => setOp(b.dataset.op)));
+['#arA','#arB'].forEach(s => $(s).addEventListener('input', runArith));
+$('#arRand').addEventListener('click', randExample);
+
+$('#csChips').addEventListener('click', e => {
+  const b = e.target.closest('button[data-f]'); if (!b) return;
+  csFilter = b.dataset.f; renderCases();
+});
+$('#csList').addEventListener('click', e => {
+  const tg = e.target.closest('button[data-toggle]');
+  if (tg){ csOpen[tg.dataset.toggle] = !csOpen[tg.dataset.toggle]; renderCases(); return; }
+  const st = e.target.closest('button.step');
+  if (st){
+    const c = CASES.find(x => x.id === st.dataset.case), i = +st.dataset.i;
+    const s = csAudit[c.id] = csAudit[c.id] || {tried: [], solved: false};
+    if (s.solved) return;
+    if (i === c.audit.wrong) s.solved = true; else if (!s.tried.includes(i)) s.tried.push(i);
+    renderCases();
+  }
+});
+
+$('#trType').addEventListener('change', newTask);
+$('#trNew').addEventListener('click', newTask);
+$('#trCheck').addEventListener('click', checkAnswer);
+$('#trShow').addEventListener('click', showAnswer);
+$('#trAns').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); tr.done ? newTask() : checkAnswer(); } });
+
+/* плавающие биты в шапке */
+(function(){
+  const box = $('#bits'); let h = '';
+  for (let i = 0; i < 36; i++){
+    h += `<span style="left:${ri(0,98)}%;top:${ri(0,95)}%;animation-duration:${ri(6,14)}s;animation-direction:alternate;font-size:${ri(14,34)}px">${Math.random() < .5 ? 0 : 1}</span>`;
+  }
+  box.innerHTML = h;
+})();
+
+/* старт */
+$('#cvFrom').value = '10'; $('#cvTo').value = '2';
+applyLang();
+$('#cvFrom').value = '10'; $('#cvTo').value = '2'; runConvert();
+newTask();
+})();
+</script>
+</body>
+</html>
