@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python: Бір өлшемді массивтердің элементтерін ауыстыру практикумы</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #f4f7fc;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            line-height: 1.5;
+            color: #1e2b3c;
+            padding: 20px 10px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, #3d1a4e, #6b2fa0);
+            color: white;
+            border-radius: 2rem;
+            padding: 2rem 2rem 1.5rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 12px 30px rgba(50, 0, 80, 0.2);
+        }
+
+        .hero h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero .subhead {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+            font-weight: 400;
+            border-left: 4px solid #d9a0ff;
+            padding-left: 1rem;
+        }
+
+        .hero p { max-width: 900px; font-size: 1.05rem; opacity: 0.95; }
+
+        /* Sections */
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 2.5rem 0 1.2rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: #3d1a4e;
+        }
+
+        .section-title i { color: #8e3ec9; font-size: 2rem; }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 8px 18px rgba(50, 0, 80, 0.06);
+            border: 1px solid #ece0f5;
+            transition: 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 30px rgba(60, 0, 100, 0.12);
+            border-color: #d2b0ec;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.3rem 0.9rem;
+            border-radius: 50px;
+            background: #f1e4fd;
+            color: #6b2fa0;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .badge.warning { background: #ffeee5; color: #b13e1a; }
+        .badge.success { background: #e1f7e7; color: #0a6d3c; }
+
+        .card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 0.25rem 0 0.75rem 0;
+            color: #3d1a4e;
+        }
+
+        .code-block {
+            background: #1a0e23;
+            color: #f0d9ff;
+            padding: 0.9rem 1rem;
+            border-radius: 1rem;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin: 1rem 0 0.8rem 0;
+            border-left: 4px solid #a855f7;
+        }
+
+        .error-text {
+            color: #c24a4a;
+            background: #fff5f5;
+            padding: 0.6rem 0.9rem;
+            border-radius: 0.9rem;
+            font-size: 0.9rem;
+            margin: 0.6rem 0;
+            border-left: 3px solid #d94f4f;
+        }
+
+        .correct-text {
+            color: #1f6d3b;
+            background: #effbf3;
+            padding: 0.6rem 0.9rem;
+            border-radius: 0.9rem;
+            font-size: 0.9rem;
+            margin: 0.6rem 0;
+            border-left: 3px solid #29a65e;
+        }
+
+        .chip-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.7rem 0 0.2rem 0; }
+
+        .chip {
+            background: #f3eafd;
+            border-radius: 50px;
+            padding: 0.25rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #6b2fa0;
+        }
+
+        /* Prompt builder */
+        .prompt-builder {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 8px 18px rgba(50, 0, 80, 0.06);
+        }
+
+        .prompt-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            margin: 1.2rem 0;
+        }
+
+        .prompt-output {
+            background: #faf3ff;
+            padding: 1.2rem;
+            border-radius: 1rem;
+            font-family: monospace;
+            border: 1px dashed #c9a0e8;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+            color: #3d1a4e;
+            min-height: 80px;
+        }
+
+        button {
+            background: #8e3ec9;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.7rem 1.6rem;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 10px rgba(142, 62, 201, 0.3);
+        }
+
+        button:hover { background: #722fa3; transform: scale(1.02); }
+
+        button.secondary {
+            background: white;
+            color: #8e3ec9;
+            border: 2px solid #8e3ec9;
+            box-shadow: none;
+        }
+
+        button.secondary:hover { background: #f6ecff; }
+
+        /* Auditor */
+        .auditor-box {
+            background: #1a0e23;
+            color: white;
+            border-radius: 2rem;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .auditor-box h2 { color: #d9a0ff; font-weight: 500; letter-spacing: 0.5px; }
+
+        .auditor-card {
+            background: #2a1736;
+            border-radius: 1.2rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border-left: 6px solid #a855f7;
+        }
+
+        .auditor-ai {
+            background: #371e47;
+            padding: 1rem;
+            border-radius: 0.9rem;
+            font-family: monospace;
+            color: #e8d0ff;
+            margin: 1rem 0;
+        }
+
+        .auditor-input {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1.5rem 0 0.5rem;
+        }
+
+        .auditor-input input {
+            flex: 1;
+            padding: 0.8rem 1.2rem;
+            border-radius: 50px;
+            border: none;
+            background: #f7f0ff;
+            font-size: 0.95rem;
+            outline: 2px solid transparent;
+        }
+
+        .auditor-input input:focus { outline: 2px solid #a855f7; }
+
+        .feedback { margin-top: 1rem; font-weight: 500; color: #ffdb9f; }
+
+        /* Worksheet */
+        .worksheet {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            margin: 2.5rem 0;
+            border: 2px dashed #d2b0ec;
+        }
+
+        .worksheet h3 {
+            color: #3d1a4e;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+        }
+
+        .fill-line {
+            display: inline-block;
+            border-bottom: 1.5px solid #c0a0d8;
+            min-width: 150px;
+            margin: 0 0.3rem;
+        }
+
+        .worksheet .field { margin: 1.2rem 0; }
+        .worksheet .field p { font-weight: 600; margin-bottom: 0.4rem; }
+
+        .worksheet .answer-area {
+            background: #fbf7ff;
+            border-radius: 0.9rem;
+            padding: 1rem;
+            border: 1px solid #e2d0f0;
+            margin-top: 0.4rem;
+        }
+
+        .qr-note {
+            font-size: 0.85rem;
+            color: #6b4a7a;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            color: #6b4a7a;
+            font-size: 0.9rem;
+        }
+
+        i { margin-right: 4px; }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.6rem; }
+            .section-title { font-size: 1.4rem; }
+            .auditor-box { padding: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Hero -->
+    <div class="hero">
+        <h1>🔄 Бір өлшемді массивтердің элементтерін ауыстыру</h1>
+        <div class="subhead">Python тілінде · ЖИ-аудит · Сыни ойлау</div>
+        <p>Бір өлшемді массивтердің элементтерін ауыстыру — бағдарламалаудағы маңызды дағды. Бұл практикумда біз Python-да тізім элементтерін орнын ауыстыру, қайта реттеу, бөлу және біріктіру әдістерін үйренеміз. ЖИ-дің осы тақырыпта жиі жіберетін қателерін талдап, оларды түзетуді меңгереміз.</p>
+    </div>
+
+    <!-- Негізгі әдістер -->
+    <div class="section-title">
+        <i class="fas fa-exchange-alt"></i> Элементтерді ауыстыру: негізгі әдістер
+    </div>
+    <div class="card-grid">
+        <div class="card">
+            <div class="card-header"><span class="badge">Негіздер</span></div>
+            <h3>Екі элементті ауыстыру</h3>
+            <div class="code-block">a = [10, 20, 30, 40]
+a[0], a[3] = a[3], a[0]
+print(a)  # [40, 20, 30, 10]</div>
+            <div class="chip-list"><span class="chip">swap</span><span class="chip">tuple</span></div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="badge">Блоктар</span></div>
+            <h3>Бөліктерді орын ауыстыру</h3>
+            <div class="code-block">a = [1, 2, 3, 4, 5]
+a[:2], a[3:] = a[3:], a[:2]
+print(a)  # [4, 5, 3, 1, 2]</div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="badge">Айналдыру</span></div>
+            <h3>Массивті кері айналдыру</h3>
+            <div class="code-block">a = [1, 2, 3, 4]
+a.reverse()
+print(a)  # [4, 3, 2, 1]
+# немесе a = a[::-1]</div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="badge">Жылжыту</span></div>
+            <h3>Циклдік жылжыту (rotate)</h3>
+            <div class="code-block">a = [1, 2, 3, 4, 5]
+k = 2
+a = a[-k:] + a[:-k]
+print(a)  # [4, 5, 1, 2, 3]</div>
+        </div>
+    </div>
+
+    <!-- ЖИ қателерінің банкі -->
+    <div class="section-title">
+        <i class="fas fa-robot"></i> ЖИ жиі жіберетін қателер (ауыстыру)
+    </div>
+    <div class="card-grid">
+        <!-- 1 -->
+        <div class="card">
+            <div class="card-header"><span class="badge warning">ЖИ қатесі</span><span class="badge">Swap</span></div>
+            <h3>Уақытша айнымалысыз қате swap</h3>
+            <div class="code-block">a = [5, 10]
+a[0] = a[1]  # ❌ 10
+a[1] = a[0]  # ❌ 10
+print(a)     # [10, 10]</div>
+            <div class="error-text"><i class="fas fa-exclamation-triangle"></i> ЖИ: «a[0] = a[1]; a[1] = a[0] дұрыс ауыстырады» деп ойлайды, бірақ бірінші амалдан кейін a[0] мәні жоғалады.</div>
+            <div class="correct-text"><i class="fas fa-check-circle"></i> Дұрыс: a[0], a[1] = a[1], a[0] немесе temp = a[0]; a[0] = a[1]; a[1] = temp</div>
+        </div>
+        <!-- 2 -->
+        <div class="card">
+            <div class="card-header"><span class="badge warning">ЖИ қатесі</span><span class="badge">Слайсинг</span></div>
+            <h3>Слайсинг шекарасын шатастыру</h3>
+            <div class="code-block">a = [1, 2, 3, 4, 5]
+a[:2], a[2:] = a[2:], a[:2]
+print(a)  # [3, 4, 5, 1, 2] ✅</div>
+            <div class="error-text">ЖИ кейде a[:2] екі емес, үш элемент алады деп қателеседі.</div>
+            <div class="correct-text">Дұрыс: a[:2] — индекстер 0,1 (2 кірмейді).</div>
+        </div>
+        <!-- 3 -->
+        <div class="card">
+            <div class="card-header"><span class="badge warning">ЖИ қатесі</span><span class="badge">reverse</span></div>
+            <h3>reverse() қайтаратын мән</h3>
+            <div class="code-block">a = [1, 2, 3]
+b = a.reverse()
+print(b)  # None ❌</div>
+            <div class="error-text">ЖИ: «b — кері айналдырылған тізім» дейді.</div>
+            <div class="correct-text">Дұрыс: reverse() тізімді орнында өзгертеді, None қайтарады. Көшіру үшін: b = a[::-1] немесе b = list(reversed(a)).</div>
+        </div>
+        <!-- 4 -->
+        <div class="card">
+            <div class="card-header"><span class="badge warning">ЖИ қатесі</span><span class="badge">Жылжыту</span></div>
+            <h3>Циклдік жылжыту</h3>
+            <div class="code-block">a = [1, 2, 3, 4, 5]
+k = 2
+a = a[k:] + a[:k]
+print(a)  # [3, 4, 5, 1, 2]</div>
+            <div class="error-text">ЖИ: «оңға жылжыту a[-k:] + a[:-k]» деп шатастырады.</div>
+            <div class="correct-text">Дұрыс: солға жылжыту — a[k:] + a[:k]; оңға жылжыту — a[-k:] + a[:-k].</div>
+        </div>
+        <!-- 5 -->
+        <div class="card">
+            <div class="card-header"><span class="badge warning">ЖИ қатесі</span><span class="badge">Көшіру</span></div>
+            <h3>Сілтеме бойынша ауыстыру</h3>
+            <div class="code-block">a = [1, 2, 3]
+b = a            # ❗️ сілтеме
+b[0], b[2] = b[2], b[0]
+print(a)         # [3, 2, 1]</div>
+            <div class="error-text">ЖИ: «b — тәуелсіз көшірме» дейді.</div>
+            <div class="correct-text">Дұрыс: b = a.copy() немесе b = a[:] қолданыңыз, әйтпесе a да өзгереді.</div>
+        </div>
+        <!-- 6 -->
+        <div class="card">
+            <div class="card-header"><span class="badge warning">ЖИ қатесі</span><span class="badge">Сорттау</span></div>
+            <h3>sort() кезіндегі ауыстыру</h3>
+            <div class="code-block">a = [3, 1, 2]
+b = a.sort()
+print(a)  # [1, 2, 3]
+print(b)  # None</div>
+            <div class="error-text">ЖИ: «sort() сұрыпталған тізімді қайтарады» дейді.</div>
+            <div class="correct-text">Дұрыс: sort() орнында сұрыптайды. Жаңа тізім үшін: b = sorted(a).</div>
+        </div>
+    </div>
+
+    <!-- Промпт конструкторы -->
+    <div class="section-title">
+        <i class="fas fa-pen-fancy"></i> Промпт конструкторы (ЖИ-ге арналған)
+    </div>
+    <div class="prompt-builder">
+        <p style="margin-bottom: 1rem;">Массив элементтерін ауыстыру бойынша ЖИ-ден дидактикалық тапсырма сұраңыз:</p>
+        <div class="prompt-row">
+            <button id="genPromptBtn"><i class="fas fa-lightbulb"></i> Промпт құрастыру</button>
+            <button class="secondary" id="clearPromptBtn"><i class="fas fa-undo-alt"></i> Тазалау</button>
+        </div>
+        <div class="prompt-output" id="promptOutput">
+            «Промпт құрастыру» батырмасын басыңыз...
+        </div>
+    </div>
+
+    <!-- Интерактивті тренажер -->
+    <div class="section-title">
+        <i class="fas fa-gavel"></i> «Digital Auditor» интерактивті тренажеры
+    </div>
+    <div class="auditor-box">
+        <h2><i class="fas fa-user-secret"></i> Сарапшы рөліне ен: ЖИ қатесін тап</h2>
+        <div class="auditor-card">
+            <p><strong>📌 Тапсырма:</strong> Берілген кодтың нәтижесін болжаңыз және ЖИ қатесін табыңыз.</p>
+            <div class="auditor-ai">
+                <i class="fas fa-robot"></i> <strong>ChatGPT «шешімі»:</strong><br>
+                <code>a = [7, 8, 9]; a[0] = a[2]; a[2] = a[0]; print(a)</code><br>
+                <span style="color:#f6b26b;">"Нәтиже: [9, 8, 7] — бірінші және үшінші элементтер ауысты"</span>
+            </div>
+            <p style="margin: 1rem 0 0.5rem; opacity: 0.9;">Сіздің диагнозыңыз:</p>
+            <div class="auditor-input">
+                <input type="text" id="auditorAnswer" placeholder="Мысалы: a[0] мәні жоғалады, нәтиже [9,8,9]...">
+                <button id="checkAuditBtn"><i class="fas fa-check"></i> Тексеру</button>
+            </div>
+            <div id="auditFeedback" class="feedback"></div>
+            <p style="font-size: 0.85rem; margin-top: 1.2rem; opacity: 0.7;"><i class="fas fa-info-circle"></i> Дұрыс жауап: a[0] = a[2] → a[0] = 9; a[2] = a[0] → a[2] = 9. Нәтиже: [9, 8, 9]. Уақытша айнымалы немесе a[0], a[2] = a[2], a[0] керек.</p>
+        </div>
+    </div>
+
+    <!-- Рабочий лист -->
+    <div class="worksheet">
+        <h3><i class="fas fa-file-alt"></i> «DIGITAL AUDITOR» ЖҰМЫС ПАРАҒЫ</h3>
+        <p style="color: #6b2fa0; margin-bottom: 1.5rem;">Python: бір өлшемді массивтердің элементтерін ауыстыру | Академиялық адалдық</p>
+
+        <div class="field">
+            <p>Оқушының аты-жөні: <span class="fill-line"></span> Сыныбы: <span class="fill-line"></span> Күні: <span class="fill-line"></span></p>
+        </div>
+
+        <div class="field">
+            <p>1. ТАПСЫРМА (ЖИ берген код):</p>
+            <div class="answer-area" style="background: #f9f2ff;">
+                <code>a = [1, 2, 3, 4]<br>a[0] = a[3]<br>a[3] = a[0]<br>print(a)</code>
+            </div>
+        </div>
+
+        <div class="field">
+            <p>2. ЖИ-дің жауабы:</p>
+            <div class="answer-area" style="background: #fff0e8;">
+                «Нәтиже: [4, 2, 3, 1] — бірінші және төртінші элементтер ауысты»
+            </div>
+        </div>
+
+        <div class="field">
+            <p>3. Сарапшы аудиті (қате бар ма? Неліктен?):</p>
+            <div class="answer-area" style="min-height: 70px;"></div>
+        </div>
+
+        <div class="field">
+            <p>4. Дұрыс шешім:</p>
+            <div class="answer-area" style="min-height: 60px;"></div>
+        </div>
+
+        <div class="field">
+            <p>5. «Адал азамат» рефлексиясы:</p>
+            <p style="font-weight: 400;">Дайын жауапты көшіру неліктен қауіпті? ЖИ қатесін табу қандай дағдыны дамытады?</p>
+            <div class="answer-area" style="min-height: 60px;"></div>
+        </div>
+
+        <div class="qr-note" style="margin-top: 2rem;">
+            <i class="fas fa-qrcode fa-2x"></i> QR-код сілтемесін баптау: <span class="fill-line" style="min-width: 200px;"></span> (сыныпқа арналған)
+        </div>
+    </div>
+
+    <footer>
+        <i class="fas fa-code"></i> Бір өлшемді массивтердің элементтерін ауыстыру · Python практикумы · ЖИ-аудит 2025
+    </footer>
+</div>
+
+<script>
+    (function() {
+        // Промпт конструктор
+        const genBtn = document.getElementById('genPromptBtn');
+        const clearBtn = document.getElementById('clearPromptBtn');
+        const output = document.getElementById('promptOutput');
+
+        const prompts = [
+            '«Python-дағы бір өлшемді массив элементтерін ауыстыру бойынша 7-сыныпқа арналған тапсырма құрастыр. ЖИ жиі жіберетін қатені көрсет: a[0] = a[1]; a[1] = a[0] уақытша айнымалысыз дұрыс ауыстырмайды. Дұрыс шешіммен және түсіндірмемен бер.»',
+            '«Тізімді кері айналдыру: reverse() әдісі мен a[::-1] слайсингінің айырмашылығын түсіндір. ЖИ reverse() сұрыпталған тізімді қайтарады деп қателеседі. Оқушыға арналған жұмыс парағын жаса.»',
+            '«Циклдік жылжыту (rotate) тақырыбында ЖИ қатесін тап: солға жылжыту a[k:] + a[:k], оңға жылжыту a[-k:] + a[:-k]. Дұрыс мысалдар келтір.»',
+            '«Слайсинг арқылы блоктарды ауыстыру: a[:2], a[2:] = a[2:], a[:2]. ЖИ кейде шекараларды шатастырады. Осыны талдайтын интерактивті тапсырма құрастыр.»',
+            '«Тізімді көшіру және ауыстыру: b = a сілтеме жасайды, b[0], b[2] = b[2], b[0] a-ны да өзгертеді. Дұрыс көшіру әдістерін (copy, slice) түсіндір.»'
+        ];
+
+        genBtn.addEventListener('click', function() {
+            const randomIndex = Math.floor(Math.random() * prompts.length);
+            output.textContent = prompts[randomIndex];
+        });
+
+        clearBtn.addEventListener('click', function() {
+            output.textContent = '«Промпт құрастыру» батырмасын басыңыз...';
+        });
+
+        // Аудитор тексеру
+        const checkBtn = document.getElementById('checkAuditBtn');
+        const answerInput = document.getElementById('auditorAnswer');
+        const feedback = document.getElementById('auditFeedback');
+
+        checkBtn.addEventListener('click', function() {
+            const ans = answerInput.value.trim().toLowerCase();
+            if (ans === '') {
+                feedback.textContent = '⚠️ Жауапты жазыңыз!';
+                feedback.style.color = '#f7c35c';
+                return;
+            }
+            const keywords = ['9', '[9, 8, 9]', 'жоғалады', 'уақытша', 'temp', 'бірдей', 'қате'];
+            const isCorrect = keywords.some(kw => ans.includes(kw));
+
+            if (isCorrect) {
+                feedback.textContent = '✅ Дұрыс! a[0] = a[2] → a[0] = 9; a[2] = a[0] → a[2] = 9. Нәтиже: [9, 8, 9]. Уақытша айнымалы немесе a[0], a[2] = a[2], a[0] керек.';
+                feedback.style.color = '#8fd6a5';
+            } else {
+                feedback.textContent = '❌ Қайта ойланыңыз. Бірінші амалдан кейін a[0]-де қандай мән қалады? a[2] = a[0] дегенде не тағайындалады?';
+                feedback.style.color = '#f7b0b0';
+            }
+        });
+
+        answerInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                checkBtn.click();
+            }
+        });
+    })();
+</script>
+</body>
+</html>

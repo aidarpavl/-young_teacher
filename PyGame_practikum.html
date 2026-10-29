@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PyGame практикумы — Python тілінде</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        background: #0f1117;
+        font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        line-height: 1.5;
+        color: #e2e8f0;
+        padding: 20px 10px;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    /* Hero */
+    .hero {
+        background: linear-gradient(135deg, #1a2a4a, #2b4a7a);
+        color: white;
+        border-radius: 2rem;
+        padding: 2.5rem 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+        border: 1px solid #3a5a8a;
+    }
+    .hero h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .hero .subhead {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #5ac8fa;
+        padding-left: 1rem;
+    }
+    .hero p { max-width: 900px; font-size: 1.05rem; opacity: 0.95; }
+
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin: 2.5rem 0 1.2rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        color: #5ac8fa;
+    }
+    .section-title i { color: #5ac8fa; font-size: 2rem; }
+
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .card {
+        background: #1a1f2e;
+        border-radius: 1.5rem;
+        padding: 1.5rem;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        border: 1px solid #2d3548;
+        transition: 0.2s ease;
+        display: flex;
+        flex-direction: column;
+    }
+    .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 36px rgba(90, 200, 250, 0.12);
+        border-color: #3a6a9a;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.3rem 0.9rem;
+        border-radius: 50px;
+        background: #1a3a5a;
+        color: #5ac8fa;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+    }
+    .badge.warning { background: #4a2020; color: #ff7b7b; }
+    .badge.success { background: #1a4a2a; color: #7bff9b; }
+
+    .card h3 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin: 0.25rem 0 0.75rem 0;
+        color: #c0d8f0;
+    }
+
+    .code-block {
+        background: #0a0e14;
+        color: #a8d8ff;
+        padding: 0.9rem 1rem;
+        border-radius: 1rem;
+        font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        font-size: 0.82rem;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+        margin: 1rem 0 0.8rem 0;
+        border-left: 4px solid #5ac8fa;
+    }
+
+    .error-text {
+        color: #ff8a8a;
+        background: #2a1010;
+        padding: 0.6rem 0.9rem;
+        border-radius: 0.9rem;
+        font-size: 0.9rem;
+        margin: 0.6rem 0;
+        border-left: 3px solid #ff4d4d;
+    }
+
+    .correct-text {
+        color: #8affa8;
+        background: #0f2a1a;
+        padding: 0.6rem 0.9rem;
+        border-radius: 0.9rem;
+        font-size: 0.9rem;
+        margin: 0.6rem 0;
+        border-left: 3px solid #2ecc71;
+    }
+
+    .chip-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.7rem 0 0.2rem 0; }
+    .chip {
+        background: #1a2a3a;
+        border-radius: 50px;
+        padding: 0.25rem 1rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #5ac8fa;
+    }
+
+    /* Prompt builder */
+    .prompt-builder {
+        background: #1a1f2e;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin: 2rem 0;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        border: 1px solid #2d3548;
+    }
+
+    .prompt-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: center;
+        margin: 1.2rem 0;
+    }
+
+    .prompt-output {
+        background: #0f1a2a;
+        padding: 1.2rem;
+        border-radius: 1rem;
+        font-family: monospace;
+        border: 1px dashed #3a6a9a;
+        margin: 1rem 0;
+        font-size: 0.95rem;
+        color: #a8d8ff;
+        min-height: 80px;
+    }
+
+    button {
+        background: #2b6cb0;
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 0.7rem 1.6rem;
+        border-radius: 50px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 12px rgba(43, 108, 176, 0.4);
+    }
+    button:hover { background: #1e4e8a; transform: scale(1.02); }
+
+    button.secondary {
+        background: transparent;
+        color: #5ac8fa;
+        border: 2px solid #2b6cb0;
+        box-shadow: none;
+    }
+    button.secondary:hover { background: #1a2a3a; }
+
+    button.pdf-btn {
+        background: #c0392b;
+        box-shadow: 0 4px 12px rgba(192, 57, 43, 0.4);
+        margin-left: auto;
+    }
+    button.pdf-btn:hover { background: #962d22; }
+    button.pdf-btn:disabled { background: #7a3a3a; cursor: wait; }
+
+    /* Auditor */
+    .auditor-box {
+        background: #0a0e14;
+        color: white;
+        border-radius: 2rem;
+        padding: 2rem;
+        margin: 2rem 0;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        border: 1px solid #2d3548;
+    }
+    .auditor-box h2 { color: #5ac8fa; font-weight: 500; }
+
+    .auditor-card {
+        background: #1a1f2e;
+        border-radius: 1.2rem;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        border-left: 6px solid #5ac8fa;
+    }
+
+    .auditor-ai {
+        background: #0f1a2a;
+        padding: 1rem;
+        border-radius: 0.9rem;
+        font-family: monospace;
+        color: #a8d8ff;
+        margin: 1rem 0;
+    }
+
+    .auditor-input {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin: 1.5rem 0 0.5rem;
+    }
+    .auditor-input input {
+        flex: 1;
+        padding: 0.8rem 1.2rem;
+        border-radius: 50px;
+        border: none;
+        background: #0f1a2a;
+        color: #e2e8f0;
+        font-size: 0.95rem;
+        outline: 2px solid transparent;
+        border: 1px solid #2d3548;
+    }
+    .auditor-input input:focus { outline: 2px solid #5ac8fa; }
+    .feedback { margin-top: 1rem; font-weight: 500; color: #ffdb9f; }
+
+    /* Worksheet */
+    .worksheet {
+        background: #ffffff;
+        color: #1e2b3c;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin: 2.5rem 0;
+        border: 2px dashed #5ac8fa;
+    }
+
+    .worksheet-header-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .worksheet h3 {
+        color: #1a2a4a;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        gap: 0.8rem;
+        align-items: center;
+    }
+
+    .fill-line {
+        display: inline-block;
+        border-bottom: 1.5px solid #8aa8c8;
+        min-width: 150px;
+        margin: 0 0.3rem;
+    }
+
+    .worksheet .field { margin: 1.2rem 0; }
+    .worksheet .field p { font-weight: 600; margin-bottom: 0.4rem; }
+
+    .worksheet .answer-area {
+        background: #f0f6ff;
+        border-radius: 0.9rem;
+        padding: 1rem;
+        border: 1px solid #d0e0f0;
+        margin-top: 0.4rem;
+    }
+
+    .qr-note {
+        font-size: 0.85rem;
+        color: #4a6a8a;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    footer {
+        text-align: center;
+        margin-top: 3rem;
+        color: #4a6a8a;
+        font-size: 0.9rem;
+    }
+
+    i { margin-right: 4px; }
+
+    @media (max-width: 600px) {
+        .hero h1 { font-size: 1.6rem; }
+        .section-title { font-size: 1.4rem; }
+        .auditor-box { padding: 1.2rem; }
+    }
+</style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Hero -->
+    <div class="hero">
+        <h1>🎮 PyGame практикумы</h1>
+        <div class="subhead">Python тілінде · Ойын жасау · ЖИ-аудит · Сыни ойлау</div>
+        <p>PyGame — Python-да 2D ойындар мен графикалық қосымшалар жасауға арналған танымал кітапхана. Бұл практикумда біз PyGame-ның негізгі құрылымдарын, ойын циклін, спрайттарды, дыбысты және оқиғаларды өңдеуді үйренеміз. ЖИ-дің осы тақырыпта жиі жіберетін қателерін талдап, оларды түзетуді меңгереміз.</p>
+    </div>
+
+    <!-- Негізгі әдістер -->
+    <div class="section-title">
+        <i class="fas fa-gamepad"></i> PyGame: негізгі құрылымдар
+    </div>
+    <div class="card-grid">
+        <div class="card">
+            <div class="card-header"><span class="badge">Негіздер</span></div>
+            <h3>Ойын терезесін құру</h3>
+            <div class="code-block">import pygame
+pygame.init()
+screen = pygame.display.set_mode((800, 600))
+pygame.display.set_caption("Менің ойыным")
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+    pygame.display.flip()
+pygame.quit()</div>
+            <div class="chip-list"><span class="chip">init</span><span class="chip">set_mode</span><span class="chip">game loop</span></div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="badge">Суреттер</span></div>
+            <h3>Спрайттар мен суреттер</h3>
+            <div class="code-block">player_img = pygame.image.load("player.png")
+player_rect = player_img.get_rect()
+player_rect.center = (400, 300)
+screen.blit(player_img, player_rect)</div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="badge">Қозғалыс</span></div>
+            <h3>Пернетақтамен басқару</h3>
+            <div class="code-block">keys = pygame.key.get_pressed()
+if keys[pygame.K_LEFT]:
+    player_rect.x -= 5
+if keys[pygame.K_RIGHT]:
+    player_rect.x += 5</div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="badge">Дыбыс</span></div>
+            <h3>Дыбыс пен музыка</h3>
+            <div class="code-block">pygame.mixer.init()
+sound = pygame.mixer.Sound("jump.wav")
+sound.play()
+pygame.mixer.music.load("bg.mp3")
+pygame.mixer.music.play(-1)</div>
+        </div>
+    </div>
+
+    <!-- ЖИ қателері -->
+    <div class="section-title">
+        <i class="fas fa-robot"></i> ЖИ жиі жіберетін қателер (PyGame)
+    </div>
+    <div class="card-grid">
+        <div class="card">
+            <div class="card-header"><span class="badge warning">ЖИ қатесі</span><span class="badge">Цикл</span></div>
+            <h3>pygame.quit() орны</h3>
+            <div class="code-block">while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()   # ❌ цикл жалғасады
+    pygame.display.flip()</div>
+            <div class="error-text"><i class="fas fa-exclamation-triangle"></i> ЖИ: «pygame.quit() шақырса, цикл автоматты тоқтайды» деп ойлайды. Шын мәнінде, цикл жалғасады және бағдарлама қате береді.</div>
+            <div class="correct-text"><i class="fas fa-check-circle"></i> Дұрыс: running = False айнымалысын қолданып, циклды тоқтату керек.</div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="badge warning">ЖИ қатесі</span><span class="badge">FPS</span></div>
+            <h3>Clock.tick() ұмыту</h3>
+            <div class="code-block">while running:
+    # ... ойын логикасы ...
+    pygame.display.flip()
+    # ❌ clock.tick(60) жоқ</div>
+            <div class="error-text">ЖИ: «ойын циклі FPS-ке тәуелсіз жұмыс істейді» дейді. Шын мәнінде, цикл өте жылдам айналады, CPU 100% жүктеледі.</div>
+            <div class="correct-text">Дұрыс: clock = pygame.time.Clock(); clock.tick(60) — 60 FPS шектеуі.</div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="badge warning">ЖИ қатесі</span><span class="badge">Blit</span></div>
+            <h3>blit() дұрыс емес аргументтер</h3>
+            <div class="code-block">screen.blit(player_img, (x, y))  # ✅
+# ЖИ кейде:
+screen.blit(player_img, player_rect)  # ✅ rect те болады
+screen.blit((x, y), player_img)  # ❌ реті қате</div>
+            <div class="error-text">ЖИ: «blit(x, y) координаттарын бірінші қабылдайды» деп шатастырады.</div>
+            <div class="correct-text">Дұрыс: surface.blit(image, (x, y)) немесе surface.blit(image, rect).</div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="badge warning">ЖИ қатесі</span><span class="badge">Спрайт</span></div>
+            <h3>Спрайттар тобын жаңарту</h3>
+            <div class="code-block">all_sprites = pygame.sprite.Group()
+all_sprites.add(player)
+# ...
+all_sprites.draw(screen)  # ✅
+all_sprites.update()       # ✅</div>
+            <div class="error-text">ЖИ: «спрайттар өздігінен жаңарады» дейді.</div>
+            <div class="correct-text">Дұрыс: әр кадрда all_sprites.update() және all_sprites.draw(screen) шақыру керек.</div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="badge warning">ЖИ қатесі</span><span class="badge">Rect</span></div>
+            <h3>Rect координаттары</h3>
+            <div class="code-block">rect = pygame.Rect(100, 100, 50, 50)
+rect.x += 5     # ✅
+rect.center = (400, 300)  # ✅
+# ЖИ кейде:
+rect.x += 5, 0  # ❌</div>
+            <div class="error-text">ЖИ: «rect.x-ке кортеж қосуға болады» дейді.</div>
+            <div class="correct-text">Дұрыс: rect.x және rect.y жеке бүтін сандар. rect.move_ip(dx, dy) — қозғалу үшін.</div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="badge warning">ЖИ қатесі</span><span class="badge">Сурет</span></div>
+            <h3>convert() / convert_alpha()</h3>
+            <div class="code-block">img = pygame.image.load("player.png").convert_alpha()
+# ✅ мөлдірлік үшін
+# ❌ convert() мөлдірлікті жоғалтады</div>
+            <div class="error-text">ЖИ: «convert() және convert_alpha() бірдей» дейді.</div>
+            <div class="correct-text">Дұрыс: PNG мөлдірлігі үшін convert_alpha(), басқа суреттер үшін convert() — жылдамдықты арттырады.</div>
+        </div>
+    </div>
+
+    <!-- Промпт конструктор -->
+    <div class="section-title">
+        <i class="fas fa-pen-fancy"></i> Промпт конструкторы (ЖИ-ге арналған)
+    </div>
+    <div class="prompt-builder">
+        <p style="margin-bottom: 1rem;">PyGame бойынша ЖИ-ден дидактикалық тапсырма сұраңыз:</p>
+        <div class="prompt-row">
+            <button id="genPromptBtn"><i class="fas fa-lightbulb"></i> Промпт құрастыру</button>
+            <button class="secondary" id="clearPromptBtn"><i class="fas fa-undo-alt"></i> Тазалау</button>
+        </div>
+        <div class="prompt-output" id="promptOutput">
+            «Промпт құрастыру» батырмасын басыңыз...
+        </div>
+    </div>
+
+    <!-- Интерактивті тренажер -->
+    <div class="section-title">
+        <i class="fas fa-gavel"></i> «Digital Auditor» интерактивті тренажеры
+    </div>
+    <div class="auditor-box">
+        <h2><i class="fas fa-user-secret"></i> Сарапшы рөліне ен: ЖИ қатесін тап</h2>
+        <div class="auditor-card">
+            <p><strong>📌 Тапсырма:</strong> Берілген PyGame кодының қатесін табыңыз.</p>
+            <div class="auditor-ai">
+                <i class="fas fa-robot"></i> <strong>ChatGPT «шешімі»:</strong><br>
+                <code>while True:<br>&nbsp;&nbsp;for event in pygame.event.get():<br>&nbsp;&nbsp;&nbsp;&nbsp;if event.type == pygame.QUIT:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pygame.quit()<br>&nbsp;&nbsp;pygame.display.flip()</code><br>
+                <span style="color:#f6b26b;">"Бұл код дұрыс — QUIT оқиғасында ойын жабылады"</span>
+            </div>
+            <p style="margin: 1rem 0 0.5rem; opacity: 0.9;">Сіздің диагнозыңыз:</p>
+            <div class="auditor-input">
+                <input type="text" id="auditorAnswer" placeholder="Мысалы: pygame.quit() циклды тоқтатпайды...">
+                <button id="checkAuditBtn"><i class="fas fa-check"></i> Тексеру</button>
+            </div>
+            <div id="auditFeedback" class="feedback"></div>
+            <p style="font-size: 0.85rem; margin-top: 1.2rem; opacity: 0.7;"><i class="fas fa-info-circle"></i> Дұрыс жауап: pygame.quit() циклды тоқтатпайды — келесі итерацияда қате шығады. running = False айнымалысын қолдану керек.</p>
+        </div>
+    </div>
+
+    <!-- Рабочий лист + PDF -->
+    <div class="worksheet" id="worksheetToExport">
+        <div class="worksheet-header-row">
+            <h3><i class="fas fa-file-alt"></i> «DIGITAL AUDITOR» ЖҰМЫС ПАРАҒЫ</h3>
+            <button class="pdf-btn" id="downloadPdfBtn"><i class="fas fa-file-pdf"></i> PDF жүктеу</button>
+        </div>
+        <p style="color: #2b6cb0; margin-bottom: 1.5rem;">PyGame практикумы | Академиялық адалдық пен сыни ойлау аудиті</p>
+
+        <div id="worksheetContent">
+            <div class="field">
+                <p>Оқушының аты-жөні: <span class="fill-line"></span> Сыныбы: <span class="fill-line"></span> Күні: <span class="fill-line"></span></p>
+            </div>
+
+            <div class="field">
+                <p>1. ТАПСЫРМА (ЖИ берген код):</p>
+                <div class="answer-area" style="background: #f0f6ff;">
+                    <code>while True:<br>&nbsp;&nbsp;for event in pygame.event.get():<br>&nbsp;&nbsp;&nbsp;&nbsp;if event.type == pygame.QUIT:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pygame.quit()<br>&nbsp;&nbsp;pygame.display.flip()</code>
+                </div>
+            </div>
+
+            <div class="field">
+                <p>2. ЖИ-дің жауабы:</p>
+                <div class="answer-area" style="background: #fff0e8;">
+                    «Бұл код дұрыс — QUIT оқиғасында ойын жабылады»
+                </div>
+            </div>
+
+            <div class="field">
+                <p>3. Сарапшы аудиті (қате бар ма? Неліктен?):</p>
+                <div class="answer-area" style="min-height: 70px;"></div>
+            </div>
+
+            <div class="field">
+                <p>4. Дұрыс шешім:</p>
+                <div class="answer-area" style="min-height: 60px;"></div>
+            </div>
+
+            <div class="field">
+                <p>5. «Адал азамат» рефлексиясы:</p>
+                <p style="font-weight: 400;">Дайын жауапты көшіру неліктен қауіпті? ЖИ қатесін табу қандай дағдыны дамытады?</p>
+                <div class="answer-area" style="min-height: 60px;"></div>
+            </div>
+
+            <div class="qr-note" style="margin-top: 2rem;">
+                <i class="fas fa-qrcode fa-2x"></i> QR-код сілтемесін баптау: <span class="fill-line" style="min-width: 200px;"></span> (сыныпқа арналған)
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <i class="fas fa-code"></i> PyGame практикумы · Python · ЖИ-аудит 2025
+    </footer>
+</div>
+
+<!-- Библиотека для генерации настоящего PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+(function () {
+    "use strict";
+
+    /* ================= 1. Промпт конструктор ================= */
+    var genBtn = document.getElementById("genPromptBtn");
+    var clearBtn = document.getElementById("clearPromptBtn");
+    var output = document.getElementById("promptOutput");
+
+    var prompts = [
+        "«PyGame-де ойын циклін дұрыс тоқтату туралы тапсырма құрастыр. ЖИ жиі жіберетін қате: pygame.quit() шақырғанда while True тоқтайды деп ойлайды. Дұрыс шешім — running = False айнымалысы. 8-сыныпқа арналған жұмыс парағын жаса.»",
+        "«PyGame-де FPS шектеуі: clock.tick(60) не үшін керек? ЖИ оны ұмытып кетеді, нәтижесінде CPU 100% жүктеледі. Оқушыға арналған мысал және түзету жаз.»",
+        "«PyGame-де screen.blit() функциясының аргументтер ретін түсіндір. ЖИ кейде blit((x,y), img) деп қате жазады. Дұрыс нұсқасы: screen.blit(img, (x, y)). Жұмыс парағы жаса.»",
+        "«PyGame спрайттар тобы (pygame.sprite.Group) қалай жұмыс істейді? ЖИ спрайттар өздігінен жаңарады деп қателеседі. all_sprites.update() және draw() әр кадрда шақырылуы керек. Тапсырма құрастыр.»",
+        "«PyGame-де convert() және convert_alpha() айырмашылығын түсіндір. ЖИ оларды бірдей деп санайды. PNG мөлдірлігі үшін convert_alpha() керек. Оқушыға арналған аудит тапсырмасын жаса.»"
+    ];
+
+    if (genBtn) {
+        genBtn.addEventListener("click", function () {
+            var i = Math.floor(Math.random() * prompts.length);
+            output.textContent = prompts[i];
+        });
+    }
+    if (clearBtn) {
+        clearBtn.addEventListener("click", function () {
+            output.textContent = "«Промпт құрастыру» батырмасын басыңыз...";
+        });
+    }
+
+    /* ================= 2. Аудитор ================= */
+    var checkBtn = document.getElementById("checkAuditBtn");
+    var answerInput = document.getElementById("auditorAnswer");
+    var feedback = document.getElementById("auditFeedback");
+
+    if (checkBtn) {
+        checkBtn.addEventListener("click", function () {
+            var ans = answerInput.value.trim().toLowerCase();
+            if (!ans) {
+                feedback.textContent = "⚠️ Жауапты жазыңыз!";
+                feedback.style.color = "#f7c35c";
+                return;
+            }
+            var keywords = ["тоқтатпайды", "running", "false", "цикл", "қате", "quit", "жабылмайды"];
+            var isCorrect = keywords.some(function (kw) { return ans.indexOf(kw) !== -1; });
+            if (isCorrect) {
+                feedback.textContent = "✅ Дұрыс! pygame.quit() циклды тоқтатпайды — келесі итерацияда қате шығады. running = False айнымалысын қолдану керек.";
+                feedback.style.color = "#8fd6a5";
+            } else {
+                feedback.textContent = "❌ Қайта ойланыңыз. pygame.quit() шақырғаннан кейін while True циклі тоқтай ма? Келесі итерацияда не болады?";
+                feedback.style.color = "#f7b0b0";
+            }
+        });
+    }
+    if (answerInput) {
+        answerInput.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                checkBtn.click();
+            }
+        });
+    }
+
+    /* ================= 3. Настоящий PDF экспорт ================= */
+    var downloadPdfBtn = document.getElementById("downloadPdfBtn");
+
+    downloadPdfBtn.addEventListener("click", function () {
+        if (typeof window.html2pdf === "undefined") {
+            alert("❌ html2pdf кітапханасы жүктелмеді. Интернетті тексеріңіз.");
+            return;
+        }
+
+        var oldHTML = downloadPdfBtn.innerHTML;
+        downloadPdfBtn.disabled = true;
+        downloadPdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Дайындалуда...';
+
+        var source = document.getElementById("worksheetContent");
+
+        // Создаём контейнер для PDF
+        var wrapper = document.createElement("div");
+        wrapper.style.padding = "20px";
+        wrapper.style.background = "#ffffff";
+        wrapper.style.color = "#000000";
+        wrapper.style.fontFamily = "'Segoe UI', Arial, sans-serif";
+        wrapper.style.width = "190mm";
+
+        // Заголовок
+        var title = document.createElement("h2");
+        title.textContent = "«DIGITAL AUDITOR» ЖҰМЫС ПАРАҒЫ";
+        title.style.color = "#1a2a4a";
+        title.style.textAlign = "center";
+        title.style.marginBottom = "6px";
+        title.style.fontSize = "20px";
+        wrapper.appendChild(title);
+
+        var subtitle = document.createElement("p");
+        subtitle.textContent = "PyGame практикумы | Академиялық адалдық пен сыни ойлау аудиті";
+        subtitle.style.color = "#2b6cb0";
+        subtitle.style.textAlign = "center";
+        subtitle.style.fontSize = "12px";
+        subtitle.style.marginBottom = "20px";
+        wrapper.appendChild(subtitle);
+
+        // Клонируем содержимое
+        var clone = source.cloneNode(true);
+        // Убираем возможные кнопки внутри
+        var buttons = clone.querySelectorAll("button");
+        buttons.forEach(function (b) { b.remove(); });
+        wrapper.appendChild(clone);
+
+        // Настройки PDF
+        var opt = {
+            margin:       [10, 10, 15, 10],
+            filename:     'PyGame_Digital_Auditor_Жұмыс_парағы.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true, letterRendering: true, logging: false },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        window.html2

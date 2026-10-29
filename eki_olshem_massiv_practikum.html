@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python: Екі өлшемді массивтер практикумы</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #f4f7fc;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            line-height: 1.5;
+            color: #1e2b3c;
+            padding: 20px 10px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, #14332b, #1c6b4e);
+            color: white;
+            border-radius: 2rem;
+            padding: 2rem 2rem 1.5rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 12px 30px rgba(0, 30, 20, 0.2);
+        }
+
+        .hero h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero .subhead {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+            font-weight: 400;
+            border-left: 4px solid #6fe0b0;
+            padding-left: 1rem;
+        }
+
+        .hero p { max-width: 900px; font-size: 1.05rem; opacity: 0.95; }
+
+        /* Sections */
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 2.5rem 0 1.2rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: #0a3a2c;
+        }
+
+        .section-title i { color: #1e9b6b; font-size: 2rem; }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 8px 18px rgba(0, 30, 20, 0.06);
+            border: 1px solid #e0ece6;
+            transition: 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 30px rgba(0, 60, 40, 0.12);
+            border-color: #a8d6c1;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.3rem 0.9rem;
+            border-radius: 50px;
+            background: #e2f5ec;
+            color: #0f6e4a;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .badge.warning { background: #ffeee5; color: #b13e1a; }
+        .badge.success { background: #e1f7e7; color: #0a6d3c; }
+
+        .card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 0.25rem 0 0.75rem 0;
+            color: #0b3a2b;
+        }
+
+        .code-block {
+            background: #0e1e17;
+            color: #c8f0dd;
+            padding: 0.9rem 1rem;
+            border-radius: 1rem;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin: 1rem 0 0.8rem 0;
+            border-left: 4px solid #2ec48f;
+        }
+
+        .error-text {
+            color: #c24a4a;
+            background: #fff5f5;
+            padding: 0.6rem 0.9rem;
+            border-radius: 0.9rem;
+            font-size: 0.9rem;
+            margin: 0.6rem 0;
+            border-left: 3px solid #d94f4f;
+        }
+
+        .correct-text {
+            color: #1f6d3b;
+            background: #effbf3;
+            padding: 0.6rem 0.9rem;
+            border-radius: 0.9rem;
+            font-size: 0.9rem;
+            margin: 0.6rem 0;
+            border-left: 3px solid #29a65e;
+        }
+
+        .chip-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.7rem 0 0.2rem 0; }
+
+        .chip {
+            background: #e9f4ee;
+            border-radius: 50px;
+            padding: 0.25rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #17684a;
+        }
+
+        /* Prompt builder */
+        .prompt-builder {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 8px 18px rgba(0, 30, 20, 0.06);
+        }
+
+        .prompt-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            margin: 1.2rem 0;
+        }
+
+        .prompt-output {
+            background: #edf9f3;
+            padding: 1.2rem;
+            border-radius: 1rem;
+            font-family: monospace;
+            border: 1px dashed #8cc9ae;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+            color: #0a4a33;
+            min-height: 80px;
+        }
+
+        button {
+            background: #1e9b6b;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.7rem 1.6rem;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 10px rgba(30, 155, 107, 0.3);
+        }
+
+        button:hover { background: #137d54; transform: scale(1.02); }
+
+        button.secondary {
+            background: white;
+            color: #1e9b6b;
+            border: 2px solid #1e9b6b;
+            box-shadow: none;
+        }
+
+        button.secondary:hover { background: #e4f6ee; }
+
+        /* Auditor */
+        .auditor-box {
+            background: #0b241c;
+            color: white;
+            border-radius: 2rem;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .auditor-box h2 { color: #9ae8c4; font-weight: 500; letter-spacing: 0.5px; }
+
+        .auditor-card {
+            background: #12352a;
+            border-radius: 1.2rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border-left: 6px solid #2ec48f;
+        }
+
+        .auditor-ai {
+            background: #1a3f32;
+            padding: 1rem;
+            border-radius: 0.9rem;
+            font-family: monospace;
+            color: #cbf7e2;
+            margin: 1rem 0;
+        }
+
+        .auditor-input {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1.5rem 0 0.5rem;
+        }
+
+        .auditor-input input {
+            flex: 1;
+            padding: 0.8rem 1.2rem;
+            border-radius: 50px;
+            border: none;
+            background: #eafaf2;
+            font-size: 0.95rem;
+            outline: 2px solid transparent;
+        }
+
+        .auditor-input input:focus { outline: 2px solid #2ec48f; }
+
+        .feedback { margin-top: 1rem; font-weight: 500; color: #ffdb9f; }
+
+        /* Worksheet */
+        .worksheet {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            margin: 2.5rem 0;
+            border: 2px dashed #a8d6c1;
+        }
+
+        .worksheet h3 {
+            color: #0b3a2b;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+        }
+
+        .fill-line {
+            display: inline-block;
+            border-bottom: 1.5px solid #9bc9b4;
+            min-width: 150px;
+            margin: 0 0.3rem;
+        }
+
+        .worksheet .field { margin: 1.2rem 0; }
+        .worksheet .field p { font-weight: 600; margin-bottom: 0.4rem; }
+
+        .worksheet .answer-area {
+            background: #f5fdf9;
+            border-radius: 0.9rem;
+            padding: 1rem;
+            border: 1px solid #cfe8dc;
+            margin-top: 0.4rem;
+        }
+
+        .qr-note {
+            font-size: 0.85rem;
+            color: #3d6b58;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            color: #4f7a68;
+            font-size: 0.9rem;
+        }
+
+        i { margin-right: 4px; }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.6rem; }
+            .section-title { font-size: 1.4rem; }
+            .auditor-box { padding: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Hero -->
+    <div class="hero">
+        <h1>🐍 Екі өлшемді массивтер практикумы</h1>
+        <div class="subhead">Python тілінде · ЖИ-аудит · Сыни ойлау</div>
+        <p>Екі өлшемді массивтер (матрицалар, кестелер) — Python-дағы тізімдердің ішіндегі тізімдер арқылы жасалады. Бұл практикумда біз ЖИ-дің матрицалармен жұмыс істегенде жиі жіберетін қателерін талдап, оларды түзетуді үйренеміз. Академиялық адалдық пен бағдарламалау мәдениетін қалыптастырамыз.</p>
+    </div>
+
+    <!-- Негізгі әдістер -->
+    <div class="section-title">
+        <i class="fas fa-table"></i> Екі өлшемді массивтер: негізгі әдістер
+    </div>
+    <div class="card-grid">
+        <div class="card">
+            <div class="card-header"><span class="badge">Негіздер</span></div>
+            <h3>Құру және индекстеу</h3>
+            <div class="code-block">matrix = [[1, 2, 3],
+          [4, 5, 6],
+          [7, 8, 9]]
+print(matrix[0][1])   # 2
+print(matrix[2][0])   # 7
+matrix[1][2] = 99     # өзгерту</div>
+            <div class="chip-list"><span class="chip">list of lists</span><span class="chip">[i][j]</span></div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="badge">Өлшемдер</span></div>
+            <h3>Жолдар мен бағандар саны</h3>
+            <div class="code-block">m = [[1, 2, 3],
+     [4, 5, 6]]
+rows = len(m)        # 2
+cols = len(m[0])     # 3</div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="badge">Айналу / басып шығару</span></div>
+            <h3>Кірістірілген цикл</h3>
+            <div class="code-block">for row in m:
+    for x in row:
+        print(x, end=' ')
+    print()</div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="badge">Генератор</span></div>
+            <h3>Матрицаны comprehension-мен құру</h3>
+            <div class="code-block">n, k = 3, 4
+m = [[0]*k for _ in range(n)]
+# 3 жол, 4 баған</div>
+        </div>
+    </div>
+
+    <!-- ЖИ қателерінің банкі -->
+    <div class="section-title">
+        <i class="fas fa-robot"></i> ЖИ жиі жіберетін қателер (екі өлшемді массивтер)
+    </div>
+    <div class="card-grid">
+        <!-- 1 -->
+        <div class="card">
+            <div class="card-header"><span class="badge warning">ЖИ қатесі</span><span class="badge">Көшіру</span></div>
+            <h3>Бірдей жолдарға сілтеме</h3>
+            <div class="code-block">m = [[0]*3] * 2
+m[0][0] = 5
+print(m)  # [[5,0,0],[5,0,0]] ❌</div>
+            <div class="error-text"><i class="fas fa-exclamation-triangle"></i> ЖИ: «екі тәуелсіз жол жасалды» деп ойлайды, бірақ [[0]*3]*2 бір ғана тізімге сілтеме жасайды.</div>
+            <div class="correct-text"><i class="fas fa-check-circle"></i> Дұрыс: m = [[0]*3 for _ in range(2)]</div>
+        </div>
+        <!-- 2 -->
+        <div class="card">
+            <div class="card-header"><span class="badge warning">ЖИ қатесі</span><span class="badge">Индекстеу</span></div>
+            <h3>Жол мен бағанды шатастыру</h3>
+            <div class="code-block">m = [[1, 2, 3],
+     [4, 5, 6]]
+print(m[1][2])  # 6 ✅
+# ЖИ жиі m[2][1] деп қателеседі</div>
+            <div class="error-text">ЖИ: «бірінші индекс — баған» деп қате түсінеді.</div>
+            <div class="correct-text">Дұрыс: m[жол][баған]. m[1][2] → 2-жол, 3-баған = 6</div>
+        </div>
+        <!-- 3 -->
+        <div class="card">
+            <div class="card-header"><span class="badge warning">ЖИ қатесі</span><span class="badge">Транспозиция</span></div>
+            <h3>zip арқылы транспозиция</h3>
+            <div class="code-block">m = [[1, 2], [3, 4], [5, 6]]
+t = list(zip(*m))
+print(t)  # [(1,3,5),(2,4,6)]</div>
+            <div class="error-text">ЖИ: «zip бағандарды емес, жолдарды біріктіреді» деп қателеседі.</div>
+            <div class="correct-text">Дұрыс: zip(*m) бағандарды топтайды — нәтиже кортеждер тізімі.</div>
+        </div>
+        <!-- 4 -->
+        <div class="card">
+            <div class="card-header"><span class="badge warning">ЖИ қатесі</span><span class="badge">Слайсинг</span></div>
+            <h3>Жолды көшіру</h3>
+            <div class="code-block">m = [[1, 2, 3], [4, 5, 6]]
+row = m[0]      # ❗️ сілтеме
+row[0] = 99
+print(m[0])     # [99, 2, 3]</div>
+            <div class="error-text">ЖИ: «row = m[0] жолды көшіреді» дейді.</div>
+            <div class="correct-text">Дұрыс: row = m[0].copy() немесе list(m[0])</div>
+        </div>
+        <!-- 5 -->
+        <div class="card">
+            <div class="card-header"><span class="badge warning">ЖИ қатесі</span><span class="badge">Іздеу</span></div>
+            <h3>2D массивте in қолдану</h3>
+            <div class="code-block">m = [[1, 2], [3, 4]]
+print(3 in m)     # False ❗️</div>
+            <div class="error-text">ЖИ: «3 матрицада бар, сондықтан True» дейді.</div>
+            <div class="correct-text">Дұрыс: in тек жоғарғы деңгейді тексереді. Ішкі элемент үшін: any(3 in row for row in m)</div>
+        </div>
+        <!-- 6 -->
+        <div class="card">
+            <div class="card-header"><span class="badge warning">ЖИ қатесі</span><span class="badge">Сорттау</span></div>
+            <h3>Жолдарды сорттау</h3>
+            <div class="code-block">m = [[3, 2], [1, 4]]
+m.sort()       # жолдар бойынша
+print(m)       # [[1,4],[3,2]]</div>
+            <div class="error-text">ЖИ: «барлық сандарды сұрыптайды» дейді.</div>
+            <div class="correct-text">Дұрыс: sort() жолдарды (ішкі тізімдерді) салыстырады. Барлық элементтер үшін: sorted(x for row in m for x in row)</div>
+        </div>
+    </div>
+
+    <!-- Промпт конструкторы -->
+    <div class="section-title">
+        <i class="fas fa-pen-fancy"></i> Промпт конструкторы (ЖИ-ге арналған)
+    </div>
+    <div class="prompt-builder">
+        <p style="margin-bottom: 1rem;">Екі өлшемді массивтер бойынша ЖИ-ден дидактикалық тапсырма сұраңыз:</p>
+        <div class="prompt-row">
+            <button id="genPromptBtn"><i class="fas fa-lightbulb"></i> Промпт құрастыру</button>
+            <button class="secondary" id="clearPromptBtn"><i class="fas fa-undo-alt"></i> Тазалау</button>
+        </div>
+        <div class="prompt-output" id="promptOutput">
+            «Промпт құрастыру» батырмасын басыңыз...
+        </div>
+    </div>
+
+    <!-- Интерактивті тренажер -->
+    <div class="section-title">
+        <i class="fas fa-gavel"></i> «Digital Auditor» интерактивті тренажеры
+    </div>
+    <div class="auditor-box">
+        <h2><i class="fas fa-user-secret"></i> Сарапшы рөліне ен: ЖИ қатесін тап</h2>
+        <div class="auditor-card">
+            <p><strong>📌 Тапсырма:</strong> Берілген кодтың нәтижесін болжаңыз және ЖИ қатесін табыңыз.</p>
+            <div class="auditor-ai">
+                <i class="fas fa-robot"></i> <strong>ChatGPT «шешімі»:</strong><br>
+                <code>m = [[1, 2], [3, 4]]; m2 = m.copy(); m2[0][0] = 99; print(m)</code><br>
+                <span style="color:#f6b26b;">"Нәтиже: [[1, 2], [3, 4]] — m өзгермейді, себебі copy() терең көшіру жасайды"</span>
+            </div>
+            <p style="margin: 1rem 0 0.5rem; opacity: 0.9;">Сіздің диагнозыңыз:</p>
+            <div class="auditor-input">
+                <input type="text" id="auditorAnswer" placeholder="Мысалы: copy() терең көшірмейді, m[0] өзгереді...">
+                <button id="checkAuditBtn"><i class="fas fa-check"></i> Тексеру</button>
+            </div>
+            <div id="auditFeedback" class="feedback"></div>
+            <p style="font-size: 0.85rem; margin-top: 1.2rem; opacity: 0.7;"><i class="fas fa-info-circle"></i> Дұрыс жауап: m.copy() — таяз көшіру. m2[0] мен m[0] бір тізімге сілтейді, сондықтан m → [[99, 2], [3, 4]]. Терең көшіру үшін copy.deepcopy() керек.</p>
+        </div>
+    </div>
+
+    <!-- Рабочий лист -->
+    <div class="worksheet">
+        <h3><i class="fas fa-file-alt"></i> «DIGITAL AUDITOR» ЖҰМЫС ПАРАҒЫ</h3>
+        <p style="color: #1e6b4a; margin-bottom: 1.5rem;">Python: екі өлшемді массивтер | Академиялық адалдық</p>
+
+        <div class="field">
+            <p>Оқушының аты-жөні: <span class="fill-line"></span> Сыныбы: <span class="fill-line"></span> Күні: <span class="fill-line"></span></p>
+        </div>
+
+        <div class="field">
+            <p>1. ТАПСЫРМА (ЖИ берген код):</p>
+            <div class="answer-area" style="background: #f2fbf6;">
+                <code>m = [[0]*2] * 3<br>m[1][0] = 7<br>print(m)</code>
+            </div>
+        </div>
+
+        <div class="field">
+            <p>2. ЖИ-дің жауабы:</p>
+            <div class="answer-area" style="background: #fff0e8;">
+                «Нәтиже: [[0, 0], [7, 0], [0, 0]] — екінші жолдың бірінші элементі ғана өзгереді»
+            </div>
+        </div>
+
+        <div class="field">
+            <p>3. Сарапшы аудиті (қате бар ма? Неліктен?):</p>
+            <div class="answer-area" style="min-height: 70px;"></div>
+        </div>
+
+        <div class="field">
+            <p>4. Дұрыс шешім:</p>
+            <div class="answer-area" style="min-height: 60px;"></div>
+        </div>
+
+        <div class="field">
+            <p>5. «Адал азамат» рефлексиясы:</p>
+            <p style="font-weight: 400;">Дайын жауапты көшіру неліктен қауіпті? ЖИ қатесін табу қандай дағдыны дамытады?</p>
+            <div class="answer-area" style="min-height: 60px;"></div>
+        </div>
+
+        <div class="qr-note" style="margin-top: 2rem;">
+            <i class="fas fa-qrcode fa-2x"></i> QR-код сілтемесін баптау: <span class="fill-line" style="min-width: 200px;"></span> (сыныпқа арналған)
+        </div>
+    </div>
+
+    <footer>
+        <i class="fas fa-code"></i> Екі өлшемді массивтер · Python практикумы · ЖИ-аудит 2025
+    </footer>
+</div>
+
+<script>
+    (function() {
+        // Промпт конструктор
+        const genBtn = document.getElementById('genPromptBtn');
+        const clearBtn = document.getElementById('clearPromptBtn');
+        const output = document.getElementById('promptOutput');
+
+        const prompts = [
+            '«Python-дағы екі өлшемді массивтер (list of lists) бойынша 8-сыныпқа арналған тапсырма құрастыр. ЖИ жиі жіберетін қатені көрсет: [[0]*3]*2 арқылы жасалған матрицаның барлық жолдары бірдей сілтеме болады. Дұрыс шешіммен және түсіндірмемен бер.»',
+            '«Матрицадағы жол мен баған индекстерін шатастыруға байланысты ЖИ қатесін тап: m[i][j] дегенде i — жол, j — баған. Оқушыға арналған жұмыс парағын жаса.»',
+            '«Python тіліндегі list.copy() әдісі таяз көшіру жасайды: екі өлшемді массивте ішкі тізімдер ортақ болып қалады. Осыған байланысты ЖИ қатесін көрсететін мысал және дұрыс нұсқасын (copy.deepcopy) жаз.»',
+            '«Екі өлшемді массивте 3 in m тек жоғарғы деңгейді тексереді. ЖИ кейде барлық элементтерді тексереді деп қателеседі. Осыны талдайтын интерактивті тапсырма құрастыр.»',
+            '«zip(*m) арқылы матрицаны транспозициялау. ЖИ кейде zip жолдарды біріктіреді деп қателеседі. Дұрыс түсіндірме және мысал келтір.»'
+        ];
+
+        genBtn.addEventListener('click', function() {
+            const randomIndex = Math.floor(Math.random() * prompts.length);
+            output.textContent = prompts[randomIndex];
+        });
+
+        clearBtn.addEventListener('click', function() {
+            output.textContent = '«Промпт құрастыру» батырмасын басыңыз...';
+        });
+
+        // Аудитор тексеру
+        const checkBtn = document.getElementById('checkAuditBtn');
+        const answerInput = document.getElementById('auditorAnswer');
+        const feedback = document.getElementById('auditFeedback');
+
+        checkBtn.addEventListener('click', function() {
+            const ans = answerInput.value.trim().toLowerCase();
+            if (ans === '') {
+                feedback.textContent = '⚠️ Жауапты жазыңыз!';
+                feedback.style.color = '#f7c35c';
+                return;
+            }
+            const keywords = ['таяз', 'copy', 'сілтеме', '99', 'өзгереді', 'deepcopy', 'терең', 'm[0]'];
+            const isCorrect = keywords.some(kw => ans.includes(kw));
+
+            if (isCorrect) {
+                feedback.textContent = '✅ Дұрыс! m.copy() таяз көшіру жасайды — m2[0] мен m[0] бір тізімге сілтейді, сондықтан m → [[99, 2], [3, 4]].';
+                feedback.style.color = '#8fd6a5';
+            } else {
+                feedback.textContent = '❌ Қайта ойланыңыз. m.copy() таяз көшіру ме, терең көшіру ме? Ішкі тізімдер ортақ па?';
+                feedback.style.color = '#f7b0b0';
+            }
+        });
+
+        answerInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                checkBtn.click();
+            }
+        });
+    })();
+</script>
+</body>
+</html>
