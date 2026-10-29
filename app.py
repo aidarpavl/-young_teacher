@@ -66,7 +66,8 @@ HTML = """
     <a class="card" href="https://raw.githack.com/aidarpavl/-young_teacher/main/Planirovanie_sprinta_Ai.html" target="_blank" rel="noopener">Планирование спринта с помощью ИИ</a>
     <a class="card" href="https://script.google.com/macros/s/AKfycbzr6dGgQzQPngbA2wcnbO6yv-x9M3tYcwi4gkrBxBgLeF38866HB1P1GnOQfHNc0ELQQw/exec" target="_blank" rel="noopener">Сынып жетекшілік.Оқушыларды белгілеу</a>
     <a class="card" href="https://stolovaia-zhd-school30.streamlit.app/" target="_blank" rel="noopener">Асханаға өтінім беру</a>
- 
+ <a class="card" href=" https://raw.github.com/aidarpavl/-young_teacher/blob/main/sistemy_schisleniya.html" target="_blank" rel="noopener">Писать с помощью ИИ</a>
+   
  </div>
 </div>
 </body>
