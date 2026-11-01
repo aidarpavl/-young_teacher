@@ -15,7 +15,7 @@ TABS = [
         ("Үйірмелер кестесі", GH + "raspisanie_kruzhkov.html"),
         ("ЖИ көмегімен сабақ жоспарын құрастыру", GH + "pourochny.html"),
         ("Жас мамандардың сабағына қатысу", GH + "zavuch_poseshenie.html"),
-        ("Әріптестердің сабақтарына қатысу", GH + "poseshenie_new.html"),
+        ("Әріптестердің сабақтарына қатысу", GH + "journal.html"),
         ("Падлет тақта", GH + "padlet-takta.html"),
         ("ЖИ көмегімен тапсырмалар жазу", GH + "voice_tool.html"),
         ("Санау жүйелері", GH + "sistemy_schisleniya.html"),
